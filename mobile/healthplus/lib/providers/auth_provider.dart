@@ -30,28 +30,34 @@ class AuthNotifier extends StateNotifier<AuthStatus> {
         state = AuthStatus.unauthenticated;
       }
     } catch (e) {
+      print('인증 상태 확인 중 오류: $e');
       state = AuthStatus.unauthenticated;
     }
   }
 
   /// 인증 상태 변화 감지
   void _listenToAuthChanges() {
-    SupabaseService.authStateChanges.listen((data) {
-      final AuthChangeEvent event = data.event;
-      final Session? session = data.session;
-      
-      if (event == AuthChangeEvent.signedIn && session != null) {
-        // JWT 토큰 저장
-        _saveJWTToken(session.accessToken);
-        state = AuthStatus.authenticated;
-      } else if (event == AuthChangeEvent.signedOut) {
-        _clearAuthData();
-        state = AuthStatus.unauthenticated;
-      } else if (event == AuthChangeEvent.tokenRefreshed && session != null) {
-        // 토큰 갱신 시 새 토큰 저장
-        _saveJWTToken(session.accessToken);
-      }
-    });
+    try {
+      SupabaseService.authStateChanges.listen((data) {
+        final AuthChangeEvent event = data.event;
+        final Session? session = data.session;
+        
+        if (event == AuthChangeEvent.signedIn && session != null) {
+          // JWT 토큰 저장
+          _saveJWTToken(session.accessToken);
+          state = AuthStatus.authenticated;
+        } else if (event == AuthChangeEvent.signedOut) {
+          _clearAuthData();
+          state = AuthStatus.unauthenticated;
+        } else if (event == AuthChangeEvent.tokenRefreshed && session != null) {
+          // 토큰 갱신 시 새 토큰 저장
+          _saveJWTToken(session.accessToken);
+        }
+      });
+    } catch (e) {
+      print('인증 상태 변화 감지 중 오류: $e');
+      state = AuthStatus.unauthenticated;
+    }
   }
 
   /// JWT 토큰 저장

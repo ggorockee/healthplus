@@ -3,7 +3,13 @@ import '../config/supabase_config.dart';
 
 /// Supabase 서비스 클래스
 class SupabaseService {
-  static final SupabaseClient _client = Supabase.instance.client;
+  static SupabaseClient get _client {
+    try {
+      return Supabase.instance.client;
+    } catch (e) {
+      throw Exception('Supabase가 초기화되지 않았습니다. 앱을 재시작해주세요.');
+    }
+  }
   
   // ========== 인증 관련 ==========
   

@@ -10,6 +10,7 @@ import 'screens/home_screen.dart';
 import 'screens/login_screen.dart';
 import 'config/supabase_config.dart';
 import 'config/env_config.dart';
+import 'services/admob_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -19,7 +20,13 @@ void main() async {
     await EnvConfig.init();
     
     // Firebase 초기화
-    await Firebase.initializeApp();
+    try {
+      await Firebase.initializeApp();
+      print('Firebase 초기화 완료');
+    } catch (e) {
+      print('Firebase 초기화 실패: $e');
+      // Firebase 초기화 실패해도 앱은 계속 실행
+    }
     
     // Supabase 설정 유효성 검사
     if (SupabaseConfig.isValid) {
