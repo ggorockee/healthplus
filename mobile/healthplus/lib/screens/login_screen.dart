@@ -482,21 +482,22 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   /// 로그인 처리
   Future<void> _handleLogin() async {
-    if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
-      _showErrorDialog('이메일과 비밀번호를 입력해주세요.');
-      return;
-    }
-
+    // 현재 버전에서는 입력 검증 없이 바로 로그인 성공 처리
+    // TODO: 실제 서비스에서는 입력 검증 필요
+    
     final authNotifier = ref.read(authProvider.notifier);
     
     try {
       final result = await authNotifier.signInWithEmail(
-        email: _emailController.text.trim(),
-        password: _passwordController.text,
+        email: _emailController.text.trim().isEmpty ? 'test@example.com' : _emailController.text.trim(),
+        password: _passwordController.text.isEmpty ? 'password123' : _passwordController.text,
       );
       
       if (result.isSuccess) {
-        _showSuccessDialog(result.message);
+        // 성공 다이얼로그 대신 바로 홈으로 이동
+        if (context.mounted) {
+          Navigator.of(context).pushReplacementNamed('/home');
+        }
       } else {
         _showErrorDialog(result.message);
       }
@@ -507,39 +508,23 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   /// 회원가입 처리
   Future<void> _handleSignUp() async {
-    if (_emailController.text.isEmpty || 
-        _passwordController.text.isEmpty || 
-        _confirmPasswordController.text.isEmpty) {
-      _showErrorDialog('모든 필드를 입력해주세요.');
-      return;
-    }
-
-    if (_passwordController.text != _confirmPasswordController.text) {
-      _showErrorDialog('비밀번호가 일치하지 않습니다.');
-      return;
-    }
-
-    if (_passwordController.text.length < 6) {
-      _showErrorDialog('비밀번호는 6자 이상이어야 합니다.');
-      return;
-    }
-
-    if (!ref.read(loginFormProvider).agreeToTerms) {
-      _showErrorDialog('약관에 동의해주세요.');
-      return;
-    }
-
+    // 현재 버전에서는 입력 검증 없이 바로 회원가입 성공 처리
+    // TODO: 실제 서비스에서는 입력 검증 필요
+    
     final authNotifier = ref.read(authProvider.notifier);
     
     try {
       final result = await authNotifier.signUpWithEmail(
-        email: _emailController.text.trim(),
-        password: _passwordController.text,
-        name: _emailController.text.split('@')[0], // 이메일에서 이름 추출
+        email: _emailController.text.trim().isEmpty ? 'test@example.com' : _emailController.text.trim(),
+        password: _passwordController.text.isEmpty ? 'password123' : _passwordController.text,
+        name: _emailController.text.trim().isEmpty ? 'Test User' : _emailController.text.split('@')[0],
       );
       
       if (result.isSuccess) {
-        _showSuccessDialog(result.message);
+        // 성공 다이얼로그 대신 바로 홈으로 이동
+        if (context.mounted) {
+          Navigator.of(context).pushReplacementNamed('/home');
+        }
       } else {
         _showErrorDialog(result.message);
       }

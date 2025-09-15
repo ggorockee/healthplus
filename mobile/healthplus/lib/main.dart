@@ -19,12 +19,12 @@ void main() async {
     // 환경 변수 초기화 (가장 먼저)
     await EnvConfig.init();
     
-    // Firebase 초기화
+    // Firebase 초기화 (선택사항)
     try {
       await Firebase.initializeApp();
       print('Firebase 초기화 완료');
     } catch (e) {
-      print('Firebase 초기화 실패: $e');
+      print('Firebase 초기화 실패 (무시): $e');
       // Firebase 초기화 실패해도 앱은 계속 실행
     }
     
