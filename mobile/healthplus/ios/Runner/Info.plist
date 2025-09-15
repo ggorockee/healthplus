@@ -45,18 +45,18 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	
+	<!-- AdMob 광고 ID -->
+	<key>GADApplicationIdentifier</key>
+	<string>ca-app-pub-3219791135582658~8150978139</string>
+	
+	<!-- 광고 추적 허용 -->
+	<key>SKAdNetworkItems</key>
+	<array>
+		<dict>
+			<key>SKAdNetworkIdentifier</key>
+			<string>cstr6suwn9.skadnetwork</string>
+		</dict>
+	</array>
 </dict>
 </plist>
-
-    <!-- AdMob 광고 ID -->
-    <key>GADApplicationIdentifier</key>
-    <string>ca-app-pub-3219791135582658~8150978139</string>
-    
-    <!-- 광고 추적 허용 -->
-    <key>SKAdNetworkItems</key>
-    <array>
-        <dict>
-            <key>SKAdNetworkIdentifier</key>
-            <string>cstr6suwn9.skadnetwork</string>
-        </dict>
-    </array>

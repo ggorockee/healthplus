@@ -16,27 +16,49 @@ class AdMobService {
     if (_isInitialized) return;
     
     try {
+      // AdMob 초기화 전에 설정 확인
+      final appId = AdMobConfig.appId;
+      if (appId.isEmpty) {
+        print('AdMob 앱 ID가 설정되지 않았습니다.');
+        return;
+      }
+      
       await MobileAds.instance.initialize();
       _isInitialized = true;
+      print('AdMob 초기화 완료');
       
-      // 전면 광고 미리 로드
-      _loadInterstitialAd();
+      // 전면 광고 미리 로드 (비동기로 처리)
+      Future.delayed(const Duration(seconds: 1), () {
+        _loadInterstitialAd();
+      });
     } catch (e) {
       print('AdMob 초기화 실패: $e');
       _isInitialized = false;
+      // 초기화 실패해도 앱은 계속 실행
     }
   }
   
   // ========== 배너 광고 ==========
   
   /// 배너 광고 생성
-  static BannerAd createBannerAd({
+  static BannerAd? createBannerAd({
     required AdSize adSize,
     required Function(Ad, LoadAdError) onAdFailedToLoad,
     required Function(Ad) onAdLoaded,
   }) {
+    if (!_isInitialized) {
+      print('AdMob이 초기화되지 않았습니다.');
+      return null;
+    }
+    
+    final adUnitId = AdMobConfig.getBannerAdId();
+    if (adUnitId.isEmpty) {
+      print('배너 광고 ID가 설정되지 않았습니다.');
+      return null;
+    }
+    
     return BannerAd(
-      adUnitId: AdMobConfig.getBannerAdId(),
+      adUnitId: adUnitId,
       size: adSize,
       request: const AdRequest(),
       listener: BannerAdListener(
@@ -53,31 +75,46 @@ class AdMobService {
   
   /// 전면 광고 로드
   static void _loadInterstitialAd() {
-    if (_interstitialAdLoadAttempts >= 3) return;
+    if (!_isInitialized || _interstitialAdLoadAttempts >= 3) return;
     
-    InterstitialAd.load(
-      adUnitId: AdMobConfig.getInterstitialAdId(),
-      request: const AdRequest(),
-      adLoadCallback: InterstitialAdLoadCallback(
-        onAdLoaded: (ad) {
-          _interstitialAd = ad;
-          _interstitialAdLoadAttempts = 0;
-          _logAdEvent('interstitial_loaded');
-        },
-        onAdFailedToLoad: (error) {
-          _interstitialAdLoadAttempts++;
-          _logAdEvent('interstitial_load_failed', error: error.message);
-          // 3초 후 재시도
-          Future.delayed(const Duration(seconds: 3), () {
-            _loadInterstitialAd();
-          });
-        },
-      ),
-    );
+    final adUnitId = AdMobConfig.getInterstitialAdId();
+    if (adUnitId.isEmpty) {
+      print('전면 광고 ID가 설정되지 않았습니다.');
+      return;
+    }
+    
+    try {
+      InterstitialAd.load(
+        adUnitId: adUnitId,
+        request: const AdRequest(),
+        adLoadCallback: InterstitialAdLoadCallback(
+          onAdLoaded: (ad) {
+            _interstitialAd = ad;
+            _interstitialAdLoadAttempts = 0;
+            _logAdEvent('interstitial_loaded');
+          },
+          onAdFailedToLoad: (error) {
+            _interstitialAdLoadAttempts++;
+            _logAdEvent('interstitial_load_failed', error: error.message);
+            // 3초 후 재시도
+            Future.delayed(const Duration(seconds: 3), () {
+              _loadInterstitialAd();
+            });
+          },
+        ),
+      );
+    } catch (e) {
+      print('전면 광고 로드 중 오류 발생: $e');
+    }
   }
   
   /// 전면 광고 표시
   static Future<bool> showInterstitialAd() async {
+    if (!_isInitialized) {
+      print('AdMob이 초기화되지 않았습니다.');
+      return false;
+    }
+    
     // 일일 최대 5회 제한
     if (_interstitialAdShowCount >= 5) return false;
     
@@ -123,26 +160,42 @@ class AdMobService {
     required Function(NativeAd) onAdLoaded,
     required Function(LoadAdError) onAdFailedToLoad,
   }) async {
-    final nativeAd = NativeAd(
-      adUnitId: AdMobConfig.getNativeAdId(),
-      listener: NativeAdListener(
-        onAdLoaded: (ad) {
-          _logAdEvent('native_loaded');
-          onAdLoaded(ad as NativeAd);
-        },
-        onAdFailedToLoad: (ad, error) {
-          _logAdEvent('native_load_failed', error: error.message);
-          onAdFailedToLoad(error);
-        },
-        onAdClicked: (ad) => _logAdEvent('native_clicked'),
-        onAdClosed: (ad) => _logAdEvent('native_closed'),
-        onAdOpened: (ad) => _logAdEvent('native_opened'),
-      ),
-      request: const AdRequest(),
-    );
+    if (!_isInitialized) {
+      print('AdMob이 초기화되지 않았습니다.');
+      return null;
+    }
     
-    await nativeAd.load();
-    return nativeAd;
+    final adUnitId = AdMobConfig.getNativeAdId();
+    if (adUnitId.isEmpty) {
+      print('네이티브 광고 ID가 설정되지 않았습니다.');
+      return null;
+    }
+    
+    try {
+      final nativeAd = NativeAd(
+        adUnitId: adUnitId,
+        listener: NativeAdListener(
+          onAdLoaded: (ad) {
+            _logAdEvent('native_loaded');
+            onAdLoaded(ad as NativeAd);
+          },
+          onAdFailedToLoad: (ad, error) {
+            _logAdEvent('native_load_failed', error: error.message);
+            onAdFailedToLoad(error);
+          },
+          onAdClicked: (ad) => _logAdEvent('native_clicked'),
+          onAdClosed: (ad) => _logAdEvent('native_closed'),
+          onAdOpened: (ad) => _logAdEvent('native_opened'),
+        ),
+        request: const AdRequest(),
+      );
+      
+      await nativeAd.load();
+      return nativeAd;
+    } catch (e) {
+      print('네이티브 광고 로드 중 오류 발생: $e');
+      return null;
+    }
   }
   
   // ========== 광고 이벤트 로깅 ==========

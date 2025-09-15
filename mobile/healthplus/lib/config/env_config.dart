@@ -25,11 +25,20 @@ class EnvConfig {
   
   /// 환경 변수 초기화
   static Future<void> init() async {
-    await dotenv.load(fileName: '.env');
+    try {
+      await dotenv.load(fileName: '.env');
+    } catch (e) {
+      print('환경 변수 파일을 찾을 수 없습니다. 기본값을 사용합니다: $e');
+      // .env 파일이 없어도 앱이 실행되도록 기본값 사용
+    }
   }
   
   /// 환경 변수 유효성 검사
   static bool get isValid {
+    // 개발 환경에서는 기본값으로도 실행 가능하도록 수정
+    if (isDevelopment) {
+      return true; // 개발 환경에서는 항상 유효
+    }
     return supabaseUrl.isNotEmpty && 
            supabaseAnonKey.isNotEmpty && 
            jwtSecret.isNotEmpty;

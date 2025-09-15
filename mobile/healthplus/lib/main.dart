@@ -22,18 +22,29 @@ void main() async {
     await Firebase.initializeApp();
     
     // Supabase 설정 유효성 검사
-    if (!SupabaseConfig.isValid) {
-      throw Exception('Supabase 설정이 올바르지 않습니다. .env 파일을 확인해주세요.');
+    if (SupabaseConfig.isValid) {
+      try {
+        // Supabase 초기화
+        await Supabase.initialize(
+          url: SupabaseConfig.url,
+          anonKey: SupabaseConfig.anonKey,
+        );
+        print('Supabase 초기화 완료');
+      } catch (e) {
+        print('Supabase 초기화 실패: $e');
+        // Supabase 초기화 실패해도 앱은 계속 실행
+      }
+    } else {
+      print('Supabase 설정이 없습니다. 오프라인 모드로 실행합니다.');
     }
     
-    // Supabase 초기화
-    await Supabase.initialize(
-      url: SupabaseConfig.url,
-      anonKey: SupabaseConfig.anonKey,
-    );
-    
-    // AdMob 초기화 비활성화 (임시)
-    // await AdMobService.initialize();
+    // AdMob 초기화 (안전하게 처리)
+    try {
+      await AdMobService.initialize();
+    } catch (e) {
+      print('AdMob 초기화 중 오류 발생: $e');
+      // AdMob 초기화 실패해도 앱은 계속 실행
+    }
     
     runApp(
       const ProviderScope(

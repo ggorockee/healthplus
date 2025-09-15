@@ -47,7 +47,14 @@ class _BannerAdWidgetState extends ConsumerState<BannerAdWidget> {
           });
         },
       );
-      _bannerAd?.load();
+      
+      if (_bannerAd != null) {
+        _bannerAd!.load();
+      } else {
+        setState(() {
+          _isAdLoaded = false;
+        });
+      }
     } catch (e) {
       print('배너 광고 로드 실패: $e');
       setState(() {
@@ -141,7 +148,14 @@ class _TopBannerAdWidgetState extends ConsumerState<TopBannerAdWidget> {
           });
         },
       );
-      _bannerAd?.load();
+      
+      if (_bannerAd != null) {
+        _bannerAd!.load();
+      } else {
+        setState(() {
+          _isAdLoaded = false;
+        });
+      }
     } catch (e) {
       print('배너 광고 로드 실패: $e');
       setState(() {

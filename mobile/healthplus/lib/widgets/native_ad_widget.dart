@@ -34,7 +34,7 @@ class _NativeAdWidgetState extends ConsumerState<NativeAdWidget> {
     if (!shouldShowAds) return;
 
     try {
-      await AdMobService.loadNativeAd(
+      final ad = await AdMobService.loadNativeAd(
         onAdLoaded: (ad) {
           setState(() {
             _nativeAd = ad;
@@ -47,6 +47,12 @@ class _NativeAdWidgetState extends ConsumerState<NativeAdWidget> {
           });
         },
       );
+      
+      if (ad == null) {
+        setState(() {
+          _isAdLoaded = false;
+        });
+      }
     } catch (e) {
       print('네이티브 광고 로드 실패: $e');
       setState(() {
@@ -157,7 +163,7 @@ class _MedicationListNativeAdWidgetState extends ConsumerState<MedicationListNat
     if (!shouldShowAds) return;
 
     try {
-      await AdMobService.loadNativeAd(
+      final ad = await AdMobService.loadNativeAd(
         onAdLoaded: (ad) {
           setState(() {
             _nativeAd = ad;
@@ -170,6 +176,12 @@ class _MedicationListNativeAdWidgetState extends ConsumerState<MedicationListNat
           });
         },
       );
+      
+      if (ad == null) {
+        setState(() {
+          _isAdLoaded = false;
+        });
+      }
     } catch (e) {
       print('네이티브 광고 로드 실패: $e');
       setState(() {
