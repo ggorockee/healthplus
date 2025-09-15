@@ -86,6 +86,9 @@ class AuthNotifier extends StateNotifier<AuthStatus> {
     state = AuthStatus.loading;
     
     try {
+      // 현재 버전에서는 Supabase 설정이 없으므로 임시로 회원가입 성공 처리
+      // TODO: 실제 Supabase 설정 완료 후 아래 코드로 교체
+      /*
       final response = await SupabaseService.signUpWithEmail(
         email: email,
         password: password,
@@ -108,6 +111,13 @@ class AuthNotifier extends StateNotifier<AuthStatus> {
         state = AuthStatus.unauthenticated;
         return AuthResult.error('회원가입에 실패했습니다.');
       }
+      */
+      
+      // 임시 회원가입 성공 처리
+      await _saveLoginStatus(LoginMethod.email);
+      state = AuthStatus.authenticated;
+      return AuthResult.success('회원가입이 완료되었습니다!');
+      
     } catch (e) {
       print('회원가입 오류: $e');
       state = AuthStatus.error;
@@ -123,21 +133,29 @@ class AuthNotifier extends StateNotifier<AuthStatus> {
     state = AuthStatus.loading;
     
     try {
+      // 현재 버전에서는 Supabase 설정이 없으므로 임시로 로그인 성공 처리
+      // TODO: 실제 Supabase 설정 완료 후 아래 코드로 교체
+      /*
       final response = await SupabaseService.signInWithEmail(
         email: email,
         password: password,
       );
       
       if (response.user != null) {
-        // 로그인 상태 저장
         await _saveLoginStatus(LoginMethod.email);
         state = AuthStatus.authenticated;
-        
         return AuthResult.success('로그인되었습니다!');
       } else {
         state = AuthStatus.unauthenticated;
         return AuthResult.error('로그인에 실패했습니다.');
       }
+      */
+      
+      // 임시 로그인 성공 처리
+      await _saveLoginStatus(LoginMethod.email);
+      state = AuthStatus.authenticated;
+      return AuthResult.success('로그인되었습니다!');
+      
     } catch (e) {
       print('로그인 오류: $e');
       state = AuthStatus.error;
