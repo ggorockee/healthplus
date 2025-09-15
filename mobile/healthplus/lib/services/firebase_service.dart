@@ -15,10 +15,24 @@ class FirebaseService {
     }
   }
   
+  /// Firebase 초기화 상태 확인
+  static bool get isInitialized {
+    try {
+      FirebaseAuth.instance;
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+  
   // ========== 인증 관련 ==========
   
   /// 현재 사용자 정보 가져오기
   static User? getCurrentUser() {
+    if (!isInitialized) {
+      print('Firebase가 초기화되지 않았습니다.');
+      return null;
+    }
     try {
       return _authInstance.currentUser;
     } catch (e) {

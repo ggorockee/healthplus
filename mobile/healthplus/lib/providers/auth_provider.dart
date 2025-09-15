@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/auth_model.dart';
 import '../services/supabase_service.dart';
+import '../services/firebase_service.dart';
 
 /// 인증 상태 관리 클래스
 class AuthNotifier extends StateNotifier<AuthStatus> {
