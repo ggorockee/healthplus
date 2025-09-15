@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'providers/onboarding_provider.dart';
 import 'providers/auth_provider.dart';
 import 'models/auth_model.dart';
@@ -18,15 +17,6 @@ void main() async {
   try {
     // 환경 변수 초기화 (가장 먼저)
     await EnvConfig.init();
-    
-    // Firebase 초기화 (선택사항)
-    try {
-      await Firebase.initializeApp();
-      print('Firebase 초기화 완료');
-    } catch (e) {
-      print('Firebase 초기화 실패 (무시): $e');
-      // Firebase 초기화 실패해도 앱은 계속 실행
-    }
     
     // Supabase 설정 유효성 검사
     if (SupabaseConfig.isValid) {

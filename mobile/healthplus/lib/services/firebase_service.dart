@@ -3,13 +3,28 @@ import 'package:firebase_core/firebase_core.dart';
 
 /// Firebase 서비스 클래스
 class FirebaseService {
-  static final FirebaseAuth _auth = FirebaseAuth.instance;
+  static FirebaseAuth? _auth;
+  
+  /// Firebase Auth 인스턴스 가져오기 (안전하게)
+  static FirebaseAuth get _authInstance {
+    try {
+      _auth ??= FirebaseAuth.instance;
+      return _auth!;
+    } catch (e) {
+      throw Exception('Firebase가 초기화되지 않았습니다. 앱을 재시작해주세요.');
+    }
+  }
   
   // ========== 인증 관련 ==========
   
   /// 현재 사용자 정보 가져오기
   static User? getCurrentUser() {
-    return _auth.currentUser;
+    try {
+      return _authInstance.currentUser;
+    } catch (e) {
+      print('Firebase Auth 오류: $e');
+      return null;
+    }
   }
   
   /// 이메일로 회원가입
@@ -17,10 +32,15 @@ class FirebaseService {
     required String email,
     required String password,
   }) async {
-    return await _auth.createUserWithEmailAndPassword(
-      email: email,
-      password: password,
-    );
+    try {
+      return await _authInstance.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+    } catch (e) {
+      print('Firebase 회원가입 오류: $e');
+      rethrow;
+    }
   }
   
   /// 이메일로 로그인
@@ -28,33 +48,56 @@ class FirebaseService {
     required String email,
     required String password,
   }) async {
-    return await _auth.signInWithEmailAndPassword(
-      email: email,
-      password: password,
-    );
+    try {
+      return await _authInstance.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+    } catch (e) {
+      print('Firebase 로그인 오류: $e');
+      rethrow;
+    }
   }
   
   /// 로그아웃
   static Future<void> signOut() async {
-    await _auth.signOut();
+    try {
+      await _authInstance.signOut();
+    } catch (e) {
+      print('Firebase 로그아웃 오류: $e');
+    }
   }
   
   /// 비밀번호 재설정
   static Future<void> resetPassword(String email) async {
-    await _auth.sendPasswordResetEmail(email: email);
+    try {
+      await _authInstance.sendPasswordResetEmail(email: email);
+    } catch (e) {
+      print('Firebase 비밀번호 재설정 오류: $e');
+      rethrow;
+    }
   }
   
   /// 이메일 인증
   static Future<void> sendEmailVerification() async {
-    final user = getCurrentUser();
-    if (user != null && !user.emailVerified) {
-      await user.sendEmailVerification();
+    try {
+      final user = getCurrentUser();
+      if (user != null && !user.emailVerified) {
+        await user.sendEmailVerification();
+      }
+    } catch (e) {
+      print('Firebase 이메일 인증 오류: $e');
     }
   }
   
   /// 인증 상태 스트림
   static Stream<User?> get authStateChanges {
-    return _auth.authStateChanges();
+    try {
+      return _authInstance.authStateChanges();
+    } catch (e) {
+      print('Firebase Auth 상태 스트림 오류: $e');
+      return Stream.value(null);
+    }
   }
   
   /// 사용자 프로필 업데이트
