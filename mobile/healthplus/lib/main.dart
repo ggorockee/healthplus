@@ -88,6 +88,16 @@ class MyApp extends StatelessWidget {
       ),
       home: const AppInitializer(),
       debugShowCheckedModeBanner: false,
+      routes: {
+        '/home': (context) => const HomeScreen(),
+        '/login': (context) => const LoginScreen(),
+        '/onboarding': (context) => const OnboardingScreen(),
+      },
+      onUnknownRoute: (settings) {
+        return MaterialPageRoute(
+          builder: (context) => const AppInitializer(),
+        );
+      },
     );
   }
 }
