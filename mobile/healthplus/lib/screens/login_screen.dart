@@ -35,47 +35,56 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
-        child: Padding(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Column(
-            children: [
-              const Spacer(flex: 2),
-              
-              // 로고 및 타이틀
-              _buildHeader(),
-              
-              const Spacer(flex: 3),
-              
-              // 소셜 로그인 버튼들
-              _buildSocialLoginButtons(),
-              
-              const SizedBox(height: 16),
-              
-              // 구분선
-              _buildDivider(),
-              
-              const SizedBox(height: 16),
-              
-              // 이메일 로그인/회원가입 폼
-              _buildEmailForm(),
-              
-              const SizedBox(height: 16),
-              
-              // 로그인/회원가입 전환
-              _buildModeToggle(),
-              
-              const SizedBox(height: 24),
-              
-              // 약관 동의 (회원가입 모드일 때만)
-              if (_isSignUpMode) _buildTermsAgreement(),
-              
-              const Spacer(flex: 2),
-              
-              // 하단 안내
-              _buildBottomText(),
-              
-              const SizedBox(height: 20),
-            ],
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              minHeight: MediaQuery.of(context).size.height - 
+                         MediaQuery.of(context).padding.top - 
+                         MediaQuery.of(context).padding.bottom,
+            ),
+            child: IntrinsicHeight(
+              child: Column(
+                children: [
+                  const SizedBox(height: 40),
+                  
+                  // 로고 및 타이틀
+                  _buildHeader(),
+                  
+                  const SizedBox(height: 40),
+                  
+                  // 소셜 로그인 버튼들
+                  _buildSocialLoginButtons(),
+                  
+                  const SizedBox(height: 16),
+                  
+                  // 구분선
+                  _buildDivider(),
+                  
+                  const SizedBox(height: 16),
+                  
+                  // 이메일 로그인/회원가입 폼
+                  _buildEmailForm(),
+                  
+                  const SizedBox(height: 16),
+                  
+                  // 로그인/회원가입 전환
+                  _buildModeToggle(),
+                  
+                  const SizedBox(height: 24),
+                  
+                  // 약관 동의 (회원가입 모드일 때만)
+                  if (_isSignUpMode) _buildTermsAgreement(),
+                  
+                  const Spacer(),
+                  
+                  // 하단 안내
+                  _buildBottomText(),
+                  
+                  const SizedBox(height: 20),
+                ],
+              ),
+            ),
           ),
         ),
       ),
@@ -226,11 +235,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             // 로고 이미지
-            Image.asset(
-              imagePath,
-              width: 20,
-              height: 20,
-              fit: BoxFit.contain,
+            SizedBox(
+              width: 24,
+              height: 24,
+              child: Image.asset(
+                imagePath,
+                fit: BoxFit.contain,
+              ),
             ),
             const SizedBox(width: 12),
             Text(

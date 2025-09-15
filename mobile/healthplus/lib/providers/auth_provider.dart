@@ -92,8 +92,12 @@ class AuthNotifier extends StateNotifier<AuthStatus> {
       );
       
       if (response.user != null) {
-        // 사용자 프로필 업데이트
-        await SupabaseService.updateUserProfile(name: name);
+        // 사용자 프로필 업데이트 (선택사항)
+        try {
+          await SupabaseService.updateUserProfile(name: name);
+        } catch (e) {
+          print('프로필 업데이트 실패 (무시): $e');
+        }
         
         // 로그인 상태 저장
         await _saveLoginStatus(LoginMethod.email);
@@ -105,6 +109,7 @@ class AuthNotifier extends StateNotifier<AuthStatus> {
         return AuthResult.error('회원가입에 실패했습니다.');
       }
     } catch (e) {
+      print('회원가입 오류: $e');
       state = AuthStatus.error;
       return AuthResult.error(_getErrorMessage(e));
     }
@@ -134,6 +139,7 @@ class AuthNotifier extends StateNotifier<AuthStatus> {
         return AuthResult.error('로그인에 실패했습니다.');
       }
     } catch (e) {
+      print('로그인 오류: $e');
       state = AuthStatus.error;
       return AuthResult.error(_getErrorMessage(e));
     }
