@@ -21,11 +21,18 @@ void main() async {
     
     // Firebase 초기화 (Supabase보다 먼저)
     try {
-      await Firebase.initializeApp();
-      print('Firebase 초기화 완료');
+      // Firebase가 이미 초기화되었는지 확인
+      if (Firebase.apps.isEmpty) {
+        await Firebase.initializeApp();
+        print('Firebase 초기화 완료');
+      } else {
+        print('Firebase가 이미 초기화되어 있습니다');
+      }
     } catch (e) {
       print('Firebase 초기화 실패: $e');
+      print('Firebase 설정 파일을 확인해주세요');
       // Firebase 초기화 실패해도 앱은 계속 실행
+      // Firebase 없이도 앱이 작동하도록 계속 진행
     }
     
     // Supabase 설정 유효성 검사
