@@ -6,18 +6,22 @@ import 'package:flutter/material.dart';
 class AppColors {
   AppColors._();
 
-  // Primary brand colors (모던 블루 계열)
-  static const Color primary = Color(0xFF2563EB); // 모던 블루
-  static const Color primaryDark = Color(0xFF1D4ED8); // 다크 블루
+  // Primary brand colors (세련된 모던 블루 계열)
+  static const Color primary = Color(0xFF1E40AF); // 딥 모던 블루
+  static const Color primaryDark = Color(0xFF1E3A8A); // 다크 블루
   static const Color primaryLight = Color(0xFFEFF6FF); // 라이트 블루
 
   // Secondary colors (세련된 보조 색상)
-  static const Color secondary = Color(0xFF7C3AED); // 보라색
-  static const Color secondaryLight = Color(0xFFF3F0FF); // 라이트 보라
+  static const Color secondary = Color(0xFF6366F1); // 인디고
+  static const Color secondaryLight = Color(0xFFF0F4FF); // 라이트 인디고
 
-  // Accent colors (세련된 포인트 색상)
+  // Accent colors (포인트 녹색 - 복용 완료 등에 사용)
   static const Color accent = Color(0xFF10B981); // 에메랄드 그린
   static const Color accentLight = Color(0xFFECFDF5); // 라이트 그린
+  
+  // Tertiary colors (추가 포인트 색상)
+  static const Color tertiary = Color(0xFF8B5CF6); // 보라색
+  static const Color tertiaryLight = Color(0xFFF3F0FF); // 라이트 보라
 
   // Text colors
   static const Color textPrimary = Color(0xFF1F2937); // 다크 그레이

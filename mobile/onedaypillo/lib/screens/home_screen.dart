@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import '../config/theme.dart';
-import '../widgets/app_button.dart';
 import '../widgets/app_text.dart';
-import '../widgets/app_card.dart';
 import '../widgets/swipeable_medication_card.dart';
 import '../providers/medication_provider.dart';
 import '../providers/medication_log_provider.dart';
@@ -228,7 +226,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ),
                 const SizedBox(width: 8),
                 AppText.bodyMedium(
-                  '좌우로 스와이프하여 복용 체크',
+                  '좌로 스와이프하여 복용 체크 또는 편집',
                   style: const TextStyle(
                     color: AppColors.white,
                     fontWeight: FontWeight.w600,

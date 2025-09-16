@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../config/theme.dart';
 import '../models/medication.dart';
+import 'app_text.dart';
 
 /// 스와이프 가능한 약물 카드 위젯
 class SwipeableMedicationCard extends StatefulWidget {
@@ -317,9 +318,13 @@ class _SwipeableMedicationCardState extends State<SwipeableMedicationCard>
     _isDragging = false;
     
     // 드래그 거리에 따라 액션 결정
-    if (_dragOffset < -100) {
+    if (_dragOffset < -150) {
       // 충분히 드래그했으면 복용 체크
       widget.onToggleTaken();
+      _resetPosition();
+    } else if (_dragOffset < -50) {
+      // 중간 정도 드래그했으면 편집 액션 표시
+      _showEditOptions();
       _resetPosition();
     } else {
       // 원래 위치로 돌아가기
@@ -337,5 +342,134 @@ class _SwipeableMedicationCardState extends State<SwipeableMedicationCard>
     ));
     _animationController.forward(from: 0);
     _dragOffset = 0.0;
+  }
+
+  /// 편집 옵션 표시
+  void _showEditOptions() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        decoration: const BoxDecoration(
+          color: AppColors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // 핸들 바
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: AppColors.border,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(height: 24),
+            // 제목
+            AppText.titleMedium(
+              '${widget.medication.name}',
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 8),
+            AppText.bodySmall(
+              '어떤 작업을 하시겠습니까?',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: AppColors.textSecondary),
+            ),
+            const SizedBox(height: 24),
+            // 액션 버튼들
+            Row(
+              children: [
+                // 복용 체크 버튼
+                Expanded(
+                  child: _buildActionButton(
+                    icon: widget.isTaken ? Icons.undo : Icons.check_circle,
+                    label: widget.isTaken ? '복용 취소' : '복용 완료',
+                    color: widget.isTaken ? AppColors.error : AppColors.accent,
+                    onTap: () {
+                      Navigator.pop(context);
+                      widget.onToggleTaken();
+                    },
+                  ),
+                ),
+                const SizedBox(width: 12),
+                // 편집 버튼
+                Expanded(
+                  child: _buildActionButton(
+                    icon: Icons.edit,
+                    label: '편집',
+                    color: AppColors.primary,
+                    onTap: () {
+                      Navigator.pop(context);
+                      widget.onEdit?.call();
+                    },
+                  ),
+                ),
+                const SizedBox(width: 12),
+                // 삭제 버튼
+                Expanded(
+                  child: _buildActionButton(
+                    icon: Icons.delete,
+                    label: '삭제',
+                    color: AppColors.error,
+                    onTap: () {
+                      Navigator.pop(context);
+                      widget.onDelete?.call();
+                    },
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// 액션 버튼 빌드
+  Widget _buildActionButton({
+    required IconData icon,
+    required String label,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return Container(
+      height: 80,
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: onTap,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                icon,
+                color: color,
+                size: 28,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                label,
+                style: TextStyle(
+                  color: color,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 12,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
