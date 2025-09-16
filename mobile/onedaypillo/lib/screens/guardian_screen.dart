@@ -11,7 +11,7 @@ class GuardianScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.surface,
       body: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(16, 60, 16, 120), // 상단 패딩을 상태바 높이만큼
+        padding: const EdgeInsets.fromLTRB(16, 20, 16, 120), // 상단 패딩을 더 줄임
         child: Column(
           children: [
             // 메인 카드
