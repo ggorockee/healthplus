@@ -212,8 +212,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     );
   }
 
-  /// 로그인 처리
+  /// 로그인 처리 (무조건 성공)
   void _handleLogin() {
+    // 입력값 검증은 유지하되, 실제 인증은 무조건 성공
     if (!_formKey.currentState!.validate()) return;
     
     final email = _emailController.text.trim();
@@ -226,6 +227,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       return;
     }
     
+    // 무조건 로그인 성공 처리
     ref.read(authProvider.notifier).signInWithEmail(email, password);
   }
 }

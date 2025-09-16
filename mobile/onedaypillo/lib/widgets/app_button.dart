@@ -30,9 +30,10 @@ class AppButton extends StatelessWidget {
           onPressed: onPressed,
           style: ElevatedButton.styleFrom(
             backgroundColor: AppColors.primary,
-            foregroundColor: AppColors.textOnPrimary,
+            foregroundColor: AppColors.white, // 더 명확한 흰색 사용
             shape: const StadiumBorder(),
             padding: padding ?? const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+            elevation: 2, // 그림자 추가로 더 명확하게
           ),
           child: child,
         ),
@@ -44,8 +45,8 @@ class AppButton extends StatelessWidget {
       child: OutlinedButton(
         onPressed: onPressed,
         style: OutlinedButton.styleFrom(
-          foregroundColor: AppColors.textPrimary,
-          side: const BorderSide(color: AppColors.primaryLight),
+          foregroundColor: AppColors.primary, // 아웃라인 버튼도 primary 색상 사용
+          side: const BorderSide(color: AppColors.primary, width: 2), // 더 굵은 테두리
           shape: const StadiumBorder(),
           padding: padding ?? const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
         ),
