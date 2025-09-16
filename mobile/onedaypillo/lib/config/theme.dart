@@ -11,9 +11,9 @@ class AppColors {
   static const Color primaryDark = Color(0xFF047857); // 다크 그린
   static const Color primaryLight = Color(0xFFECFDF5); // 라이트 그린
 
-  // Secondary colors (보조 그린 색상)
-  static const Color secondary = Color(0xFF10B981); // 에메랄드 그린
-  static const Color secondaryLight = Color(0xFFD1FAE5); // 매우 연한 그린
+  // Secondary colors (보라색 계열 - 그린과 조화)
+  static const Color secondary = Color(0xFF8B5CF6); // 보라색
+  static const Color secondaryLight = Color(0xFFF3F0FF); // 라이트 보라
 
   // Accent colors (포인트 색상)
   static const Color accent = Color(0xFF10B981); // 에메랄드 그린
