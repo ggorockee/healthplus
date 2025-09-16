@@ -55,6 +55,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         foregroundColor: AppColors.textPrimary,
         elevation: 0,
         centerTitle: true,
+        toolbarHeight: 80,
         flexibleSpace: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
@@ -67,9 +68,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                const SizedBox(height: 8),
+                const SizedBox(height: 4),
                 _buildWeeklyCalendar(),
-                const SizedBox(height: 16),
+                const SizedBox(height: 8),
               ],
             ),
           ),
@@ -297,54 +298,50 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final startOfWeek = now.subtract(Duration(days: now.weekday % 7));
     
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Column(
-        children: [
-          // 요일 표시
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: List.generate(7, (index) {
-              final day = startOfWeek.add(Duration(days: index));
-              final isToday = day.day == now.day && day.month == now.month && day.year == now.year;
-              
-              return Expanded(
-                child: Column(
-                  children: [
-                    // 요일 약어
-                    Text(
-                      weekdays[index],
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: List.generate(7, (index) {
+          final day = startOfWeek.add(Duration(days: index));
+          final isToday = day.day == now.day && day.month == now.month && day.year == now.year;
+          
+          return Expanded(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // 요일 약어
+                Text(
+                  weekdays[index],
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w500,
+                    color: isToday ? AppColors.primary : AppColors.textSecondary,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                // 날짜
+                Container(
+                  width: 28,
+                  height: 28,
+                  decoration: BoxDecoration(
+                    color: isToday ? AppColors.primary : Colors.transparent,
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: Center(
+                    child: Text(
+                      '${day.day}',
                       style: TextStyle(
                         fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                        color: isToday ? AppColors.primary : AppColors.textSecondary,
+                        fontWeight: FontWeight.w600,
+                        color: isToday ? AppColors.white : AppColors.textPrimary,
                       ),
                     ),
-                    const SizedBox(height: 4),
-                    // 날짜
-                    Container(
-                      width: 32,
-                      height: 32,
-                      decoration: BoxDecoration(
-                        color: isToday ? AppColors.primary : Colors.transparent,
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Center(
-                        child: Text(
-                          '${day.day}',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: isToday ? AppColors.white : AppColors.textPrimary,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
-              );
-            }),
-          ),
-        ],
+              ],
+            ),
+          );
+        }),
       ),
     );
   }
