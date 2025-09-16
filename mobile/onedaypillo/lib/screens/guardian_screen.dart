@@ -11,11 +11,19 @@ class GuardianScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.surface,
       appBar: AppBar(
+        title: Text(
+          '가족 관리',
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.w600,
+            color: AppColors.textPrimary,
+            fontFamily: AppTypography.fontFamily,
+          ),
+        ),
         backgroundColor: AppColors.white,
         foregroundColor: AppColors.textPrimary,
         elevation: 0,
-        toolbarHeight: 80,
-        flexibleSpace: _buildWeeklyCalendar(),
+        centerTitle: true,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 120), // 하단 여백 증가
@@ -132,55 +140,6 @@ class GuardianScreen extends StatelessWidget {
     );
   }
 
-  /// 주간 달력 빌드 (달력 제거, 제목만 표시)
-  Widget _buildWeeklyCalendar() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  '가족 관리',
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary,
-                    fontFamily: AppTypography.fontFamily,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  '가족과 함께 건강을 관리해보세요',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w400,
-                    color: AppColors.textSecondary,
-                    fontFamily: AppTypography.fontFamily,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: AppColors.primaryLight,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(
-              Icons.family_restroom,
-              color: AppColors.primary,
-              size: 24,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   /// 기능 소개 카드 위젯
   Widget _buildFeatureCard({
