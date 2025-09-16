@@ -43,3 +43,39 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# 민감한 정보가 포함된 파일들
+# Firebase 설정 파일
+android/app/google-services.json
+ios/Runner/GoogleService-Info.plist
+macos/Runner/GoogleService-Info.plist
+
+# Android 로컬 설정
+android/local.properties
+
+# 환경 변수 파일
+.env
+.env.local
+.env.development
+.env.production
+.env.staging
+
+# API 키 및 시크릿이 포함된 설정 파일
+lib/config/supabase_config.dart
+lib/config/firebase_config.dart
+
+# 키스토어 파일
+*.jks
+*.keystore
+*.p8
+*.p12
+*.mobileprovision
+
+# iOS 프로비저닝 프로파일
+*.mobileprovision
+*.p8
+
+# 기타 민감한 파일
+secrets.json
+config.json
+credentials.json
