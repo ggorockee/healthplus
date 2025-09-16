@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "healthplus.fullname" . }}
+  namespace: {{ include "healthplus.namespace" . }}
+  labels:
+    {{- include "healthplus.labels" . | nindent 4 }}
+    component: backend
+spec:
+  replicas: {{ include "healthplus.replicaCount" . }}
+  selector:
+    matchLabels:
+      {{- include "healthplus.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+      labels:
+        {{- include "healthplus.podLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "healthplus.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.securityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.targetPort }}
+              protocol: TCP
+          envFrom:
+            - configMapRef:
+                name: {{ include "healthplus.fullname" . }}-config
+            # Secret은 외부에서 관리되므로 존재할 때만 참조
+            {{- if .Values.secrets }}
+            {{- range .Values.secrets }}
+            - secretRef:
+                name: {{ .name }}
+            {{- end }}
+            {{- end }}
+          livenessProbe:
+            {{- include "healthplus.livenessProbe" . | nindent 12 }}
+          readinessProbe:
+            {{- include "healthplus.readinessProbe" . | nindent 12 }}
+          resources:
+            {{- include "healthplus.resources" . | nindent 12 }}
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+              readOnly: false
+      volumes:
+        - name: tmp
+          emptyDir: {}

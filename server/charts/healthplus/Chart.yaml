@@ -1,0 +1,19 @@
+apiVersion: v2
+name: healthplus
+description: HealthPlus 약물 관리 앱 Helm Chart - 개발/운영 환경을 위한 범용 배포 차트
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+home: https://github.com/woohaen88/healthplus
+maintainers:
+  - name: woohaen88
+    email: woohaen88@gmail.com
+keywords:
+  - healthplus
+  - medication
+  - python
+  - fastapi
+  - kubernetes
+annotations:
+  category: Application
+  "helm.sh/chart-type": application

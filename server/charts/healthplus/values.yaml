@@ -1,0 +1,145 @@
+# 환경 타입을 지정 (production | development)
+environmentType: production
+
+# 공통 설정
+image:
+  repository: healthplus
+  pullPolicy: IfNotPresent
+  tag: "latest"
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 8000
+
+# Pod에 추가할 사용자 정의 레이블 (fluent-bit 식별용)
+# 이 레이블은 Deployment의 spec.template.metadata.labels에 추가되어야 함
+podExtraLabels:
+  logging: "fluent-bit"
+  app-group: "healthplus-backend"
+  tier: "backend"
+
+# 네임스페이스 설정 (선택사항)
+namespaceOverride: ""
+
+# 보안 컨텍스트
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  fsGroup: 2000
+
+# 서비스 계정
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+# 노드 선택기
+nodeSelector: {}
+
+# 톨러레이션
+tolerations: []
+
+# 어피니티
+affinity: {}
+
+# --- 환경별 상세 설정 ---
+# environmentType 값에 따라 아래의 설정 블록 중 하나가 선택되어 적용되어야 함
+
+production:
+  replicaCount: 2
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 250m
+      memory: 256Mi
+  # 운영 환경에서 사용할 환경 변수 (ConfigMap 데이터)
+  config:
+    APP_ENV: "production"
+    HOST: "0.0.0.0"
+    PORT: "8000"
+    DEBUG: "False"
+    ENVIRONMENT: "production"
+    LOG_LEVEL: "info"
+    APP_NAME: "내 약 관리"
+    APP_VERSION: "1.0.0"
+    NOTIFICATION_ENABLED: "true"
+    PUSH_NOTIFICATION_ENABLED: "true"
+    JWT_EXPIRY_HOURS: "24"
+    JWT_ALGORITHM: "HS256"
+    # Gunicorn production settings
+    GUNICORN_WORKERS: "4"
+    GUNICORN_WORKER_CONNECTIONS: "1000"
+    GUNICORN_MAX_REQUESTS: "1000"
+    GUNICORN_MAX_REQUESTS_JITTER: "50"
+    GUNICORN_TIMEOUT: "30"
+    GUNICORN_KEEPALIVE: "5"
+    GUNICORN_LOG_LEVEL: "info"
+    GUNICORN_PRELOAD_APP: "true"
+  # Health Check 설정
+  livenessProbe:
+    httpGet:
+      path: /health
+      port: 8000
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+  readinessProbe:
+    httpGet:
+      path: /health
+      port: 8000
+    initialDelaySeconds: 5
+    periodSeconds: 5
+    timeoutSeconds: 3
+    failureThreshold: 3
+
+development:
+  replicaCount: 1
+  resources: {} # 개발 환경에서는 리소스 제한 없음
+  # 개발 환경에서 사용할 환경 변수 (ConfigMap 데이터)
+  config:
+    APP_ENV: "development"
+    HOST: "0.0.0.0"
+    PORT: "8000"
+    DEBUG: "True"
+    ENVIRONMENT: "development"
+    LOG_LEVEL: "debug"
+    APP_NAME: "내 약 관리"
+    APP_VERSION: "1.0.0"
+    NOTIFICATION_ENABLED: "true"
+    PUSH_NOTIFICATION_ENABLED: "true"
+    JWT_EXPIRY_HOURS: "24"
+    JWT_ALGORITHM: "HS256"
+    # Gunicorn settings (not used in dev but available)
+    GUNICORN_WORKERS: "1"
+    GUNICORN_LOG_LEVEL: "debug"
+  # Health Check 설정 (개발환경은 더 관대하게)
+  livenessProbe:
+    httpGet:
+      path: /health
+      port: 8000
+    initialDelaySeconds: 15
+    periodSeconds: 30
+    timeoutSeconds: 5
+    failureThreshold: 5
+  readinessProbe:
+    httpGet:
+      path: /health
+      port: 8000
+    initialDelaySeconds: 5
+    periodSeconds: 10
+    timeoutSeconds: 3
+    failureThreshold: 5
+
+# Secret 설정 (Helm에서 직접 관리하지 않음 - 외부에서 생성)
+# secrets:
+#   - name: healthplus-secrets
+#     keys:
+#       - SUPABASE_URL
+#       - SUPABASE_ANON_KEY
+#       - SUPABASE_SERVICE_ROLE_KEY
+#       - JWT_SECRET
+#       - REDIS_URL
