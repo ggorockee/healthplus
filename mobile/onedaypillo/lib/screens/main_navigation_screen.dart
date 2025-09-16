@@ -43,11 +43,14 @@ class _MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
         },
       ),
       appBar: AppBar(
-        title: Text(_getAppBarTitle()),
-        backgroundColor: const Color(0xFF4CAF50),
-        foregroundColor: Colors.white,
+        title: Text(
+          _getAppBarTitle(),
+          style: const TextStyle(color: Colors.black),
+        ),
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
         elevation: 0,
-        centerTitle: true,
+        centerTitle: false,
         actions: [
           PopupMenuButton<String>(
             onSelected: (value) {
@@ -71,7 +74,7 @@ class _MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
               padding: const EdgeInsets.all(16),
               child: CircleAvatar(
                 radius: 16,
-                backgroundColor: Colors.white.withValues(alpha: 0.2),
+                backgroundColor: const Color(0xFF4CAF50),
                 child: Text(
                   currentUser?.email.substring(0, 1).toUpperCase() ?? 'U',
                   style: const TextStyle(
