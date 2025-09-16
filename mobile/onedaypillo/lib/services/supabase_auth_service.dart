@@ -110,35 +110,4 @@ class SupabaseAuthService {
       debugPrint('사용자 프로필 생성 실패: $e');
     }
   }
-
-  /// 데모 계정 생성 (개발용)
-  static Future<void> createDemoAccount() async {
-    try {
-      // 이미 데모 계정이 있는지 확인
-      final existingUser = await _client
-          .from('users')
-          .select()
-          .eq('email', 'sample@example.com')
-          .maybeSingle();
-
-      if (existingUser != null) {
-        debugPrint('데모 계정이 이미 존재합니다.');
-        return;
-      }
-
-      // 데모 계정 회원가입
-      final response = await _client.auth.signUp(
-        email: 'sample@example.com',
-        password: 'sample123\$',
-      );
-
-      if (response.user != null) {
-        await _createUserProfile(response.user!);
-        
-        debugPrint('데모 계정 생성 완료: sample@example.com');
-      }
-    } catch (e) {
-      debugPrint('데모 계정 생성 실패: $e');
-    }
-  }
 }

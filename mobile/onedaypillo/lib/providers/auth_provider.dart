@@ -13,9 +13,6 @@ class AuthNotifier extends StateNotifier<AuthState> {
     try {
       state = state.copyWith(status: AuthStatus.loading);
       
-      // 데모 계정 생성
-      await SupabaseAuthService.createDemoAccount();
-      
       // 현재 사용자 확인
       final user = SupabaseAuthService.currentUser;
       
