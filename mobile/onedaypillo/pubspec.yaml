@@ -55,6 +55,12 @@ dependencies:
   sign_in_with_apple: ^6.1.2
   supabase_flutter: ^2.10.1
   
+  # Firebase 성능 및 분석
+  firebase_analytics: ^11.3.3
+  firebase_crashlytics: ^4.1.3
+  firebase_performance: ^0.10.0+7
+  firebase_remote_config: ^5.0.2
+  
   # 차트 라이브러리
   fl_chart: ^0.68.0
 

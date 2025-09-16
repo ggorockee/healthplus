@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "502795729186",
+    "project_id": "medicine-1f073",
+    "storage_bucket": "medicine-1f073.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:502795729186:android:2f48b7547be3f3c4d1cd7b",
+        "android_client_info": {
+          "package_name": "com.woohalabs.medicine"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDfMYLSqHlF50HpCSB_31Ukncthvj92ZK8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

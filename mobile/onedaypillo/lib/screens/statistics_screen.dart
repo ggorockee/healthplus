@@ -204,8 +204,8 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
   /// 주요 지표 카드들
   Widget _buildKeyMetricsCards() {
     final data = _selectedPeriod == 'week' ? _mockWeeklyData : _mockMonthlyData;
-    final totalTaken = data.fold<int>(0, (sum, item) => sum + (item['taken'] ?? item['adherence']).toInt());
-    final totalMissed = data.fold<int>(0, (sum, item) => sum + (item['missed'] ?? 0).toInt());
+    final totalTaken = data.fold<int>(0, (sum, item) => sum + ((item['taken'] ?? item['adherence']) as num).toInt());
+    final totalMissed = data.fold<int>(0, (sum, item) => sum + ((item['missed'] ?? 0) as num).toInt());
     final adherenceRate = totalTaken / (totalTaken + totalMissed) * 100;
     
     return Row(
