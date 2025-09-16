@@ -26,15 +26,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     super.initState();
     // AdMob 초기화 및 배너 광고 로드
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(adMobProvider.notifier).initialize();
-      ref.read(adMobProvider.notifier).loadBannerAd(AdUnitIds.bottomBanner);
+      if (mounted) {
+        ref.read(adMobProvider.notifier).initialize();
+        ref.read(adMobProvider.notifier).loadBannerAd(AdUnitIds.bottomBanner);
+      }
     });
   }
 
   @override
   void dispose() {
-    // 배너 광고 해제
-    ref.read(adMobProvider.notifier).disposeBannerAd();
+    // 배너 광고 해제 (mounted 체크 없이 직접 호출)
+    try {
+      ref.read(adMobProvider.notifier).disposeBannerAd();
+    } catch (e) {
+      // dispose 중 오류 무시
+    }
     super.dispose();
   }
 

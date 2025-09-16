@@ -76,7 +76,6 @@ class MedicationLogNotifier extends StateNotifier<List<MedicationLog>> {
 
   /// 복용률 계산 (최근 7일)
   double getAdherenceRate(String medicationId) {
-    final logs = getLogsForMedication(medicationId);
     final now = DateTime.now();
     int takenCount = 0;
     int totalCount = 0;

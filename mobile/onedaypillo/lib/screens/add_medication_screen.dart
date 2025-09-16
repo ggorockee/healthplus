@@ -21,7 +21,7 @@ class _AddMedicationScreenState extends ConsumerState<AddMedicationScreen> {
   final _dosageController = TextEditingController();
   
   TimeOfDay _selectedTime = const TimeOfDay(hour: 9, minute: 0);
-  List<int> _selectedDays = []; // 0=일요일, 1=월요일, ...
+  final List<int> _selectedDays = []; // 0=일요일, 1=월요일, ...
 
   @override
   void dispose() {
