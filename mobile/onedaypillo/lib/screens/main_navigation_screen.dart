@@ -122,6 +122,8 @@ class _MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
         return '복용 기록';
       case 2:
         return '통계';
+      case 3:
+        return '가족 관리';
       default:
         return '하루 알약';
     }

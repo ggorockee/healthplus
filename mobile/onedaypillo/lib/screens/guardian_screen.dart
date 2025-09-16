@@ -18,7 +18,7 @@ class GuardianScreen extends StatelessWidget {
         flexibleSpace: _buildWeeklyCalendar(),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 100), // 하단 여백 추가
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 120), // 하단 여백 증가
         child: Column(
           children: [
             // 메인 카드
@@ -125,7 +125,7 @@ class GuardianScreen extends StatelessWidget {
               description: '가족에게 따뜻한 응원 메시지를 보낼 수 있어요',
             ),
             
-            const SizedBox(height: 20), // 추가 여백
+            const SizedBox(height: 40), // 하단 여백 증가
           ],
         ),
       ),
