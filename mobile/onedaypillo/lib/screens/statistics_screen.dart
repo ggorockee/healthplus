@@ -1,20 +1,47 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fl_chart/fl_chart.dart';
 import '../config/theme.dart';
 import '../widgets/app_text.dart';
 import '../widgets/app_card.dart';
-import '../providers/medication_provider.dart';
-import '../providers/medication_log_provider.dart';
-import '../models/medication.dart';
 
 /// 통계 화면 - 복용률 및 리포트
-class StatisticsScreen extends ConsumerWidget {
+class StatisticsScreen extends ConsumerStatefulWidget {
   const StatisticsScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final medications = ref.watch(medicationProvider);
-    final logs = ref.watch(medicationLogProvider);
+  ConsumerState<StatisticsScreen> createState() => _StatisticsScreenState();
+}
+
+class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
+  String _selectedPeriod = 'week'; // 'week', 'month'
+  
+  // 모의데이터
+  final List<Map<String, dynamic>> _mockWeeklyData = [
+    {'day': '월', 'taken': 8, 'missed': 2, 'total': 10},
+    {'day': '화', 'taken': 9, 'missed': 1, 'total': 10},
+    {'day': '수', 'taken': 7, 'missed': 3, 'total': 10},
+    {'day': '목', 'taken': 10, 'missed': 0, 'total': 10},
+    {'day': '금', 'taken': 8, 'missed': 2, 'total': 10},
+    {'day': '토', 'taken': 6, 'missed': 4, 'total': 10},
+    {'day': '일', 'taken': 9, 'missed': 1, 'total': 10},
+  ];
+  
+  final List<Map<String, dynamic>> _mockMonthlyData = [
+    {'week': '1주차', 'adherence': 85.0},
+    {'week': '2주차', 'adherence': 92.0},
+    {'week': '3주차', 'adherence': 78.0},
+    {'week': '4주차', 'adherence': 88.0},
+  ];
+  
+  final List<Map<String, dynamic>> _mockMedicationStats = [
+    {'name': '아스피린', 'adherence': 95.0, 'totalDoses': 28, 'missedDoses': 2},
+    {'name': '비타민D', 'adherence': 88.0, 'totalDoses': 30, 'missedDoses': 4},
+    {'name': '오메가3', 'adherence': 92.0, 'totalDoses': 30, 'missedDoses': 2},
+  ];
+
+  @override
+  Widget build(BuildContext context) {
 
     return Scaffold(
       backgroundColor: AppColors.surface,
@@ -25,32 +52,40 @@ class StatisticsScreen extends ConsumerWidget {
         toolbarHeight: 80,
         flexibleSpace: _buildWeeklyCalendar(),
       ),
-      body: medications.isEmpty
-          ? _buildEmptyState()
-          : SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 100), // 하단 여백 추가
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // 전체 복용률 카드
-                  _buildOverallAdherenceCard(medications, logs, ref),
-                  const SizedBox(height: 16),
-                  
-                  // 약물별 복용률
-                  AppText.titleMedium('약물별 복용률'),
-                  const SizedBox(height: 12),
-                  ...medications.map((medication) => 
-                    _buildMedicationStatsCard(medication, logs, ref)),
-                  
-                  const SizedBox(height: 16),
-                  
-                  // 주간 통계
-                  _buildWeeklyStatsCard(logs),
-                  
-                  const SizedBox(height: 20), // 추가 여백
-                ],
-              ),
-            ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // 기간 선택 탭
+            _buildPeriodSelector(),
+            const SizedBox(height: 20),
+            
+            // 주요 지표 카드들
+            _buildKeyMetricsCards(),
+            const SizedBox(height: 20),
+            
+            // 복용률 추이 차트
+            _buildAdherenceTrendChart(),
+            const SizedBox(height: 20),
+            
+            // 일별 복용 현황 차트
+            _buildDailyAdherenceChart(),
+            const SizedBox(height: 20),
+            
+            // 약물별 상세 통계
+            _buildMedicationDetailedStats(),
+            const SizedBox(height: 20),
+            
+            // 복용 패턴 분석
+            _buildAdherencePatternAnalysis(),
+            const SizedBox(height: 20),
+            
+            // 인사이트 카드
+            _buildInsightsCard(),
+          ],
+        ),
+      ),
     );
   }
 
@@ -109,186 +144,458 @@ class StatisticsScreen extends ConsumerWidget {
     );
   }
 
-  /// 빈 상태 위젯
-  Widget _buildEmptyState() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+  /// 기간 선택 탭
+  Widget _buildPeriodSelector() {
+    return Container(
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceAlt,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
         children: [
-          Icon(
-            Icons.bar_chart,
-            size: 80,
-            color: AppColors.textSecondary,
+          Expanded(
+            child: GestureDetector(
+              onTap: () => setState(() => _selectedPeriod = 'week'),
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                decoration: BoxDecoration(
+                  color: _selectedPeriod == 'week' ? AppColors.primary : Colors.transparent,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Center(
+                  child: Text(
+                    '1주일',
+                    style: TextStyle(
+                      color: _selectedPeriod == 'week' ? AppColors.white : AppColors.textSecondary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
+            ),
           ),
-          const SizedBox(height: 16),
-          AppText.titleMedium(
-            '통계 데이터가 없습니다',
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 8),
-          AppText.bodySmall(
-            '약을 추가하고 복용 기록을 쌓아보세요',
-            textAlign: TextAlign.center,
+          Expanded(
+            child: GestureDetector(
+              onTap: () => setState(() => _selectedPeriod = 'month'),
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                decoration: BoxDecoration(
+                  color: _selectedPeriod == 'month' ? AppColors.primary : Colors.transparent,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Center(
+                  child: Text(
+                    '1개월',
+                    style: TextStyle(
+                      color: _selectedPeriod == 'month' ? AppColors.white : AppColors.textSecondary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
+            ),
           ),
         ],
       ),
     );
   }
 
-  /// 전체 복용률 카드
-  Widget _buildOverallAdherenceCard(List<Medication> medications, List<dynamic> logs, WidgetRef ref) {
-    if (medications.isEmpty) return const SizedBox.shrink();
+  /// 주요 지표 카드들
+  Widget _buildKeyMetricsCards() {
+    final data = _selectedPeriod == 'week' ? _mockWeeklyData : _mockMonthlyData;
+    final totalTaken = data.fold<int>(0, (sum, item) => sum + (item['taken'] ?? item['adherence']).toInt());
+    final totalMissed = data.fold<int>(0, (sum, item) => sum + (item['missed'] ?? 0).toInt());
+    final adherenceRate = totalTaken / (totalTaken + totalMissed) * 100;
     
-    double totalAdherence = 0;
-    for (final medication in medications) {
-      totalAdherence += ref.read(medicationLogProvider.notifier).getAdherenceRate(medication.id);
-    }
-    final averageAdherence = totalAdherence / medications.length;
-    final adherencePercentage = (averageAdherence * 100).round();
+    return Row(
+      children: [
+        Expanded(
+          child: _buildMetricCard(
+            '전체 복용률',
+            '${adherenceRate.toStringAsFixed(1)}%',
+            Icons.trending_up,
+            adherenceRate >= 80 ? AppColors.success : adherenceRate >= 60 ? AppColors.warning : AppColors.error,
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: _buildMetricCard(
+            '복용 횟수',
+            '$totalTaken회',
+            Icons.medication,
+            AppColors.primary,
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: _buildMetricCard(
+            '미복용 횟수',
+            '$totalMissed회',
+            Icons.warning,
+            AppColors.error,
+          ),
+        ),
+      ],
+    );
+  }
 
+  /// 개별 지표 카드
+  Widget _buildMetricCard(String title, String value, IconData icon, Color color) {
     return AppCard(
       child: Column(
         children: [
-          Row(
-            children: [
-              Icon(
-                Icons.trending_up,
-                color: AppColors.primary,
-                size: 32,
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    AppText.titleMedium('전체 복용률'),
-                    AppText.bodySmall('최근 7일 평균'),
-                  ],
-                ),
-              ),
-              AppText.titleLarge(
-                '$adherencePercentage%',
-                style: TextStyle(
-                  color: adherencePercentage >= 80 ? AppColors.success : 
-                         adherencePercentage >= 60 ? AppColors.warning : AppColors.error,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          LinearProgressIndicator(
-            value: averageAdherence,
-            backgroundColor: AppColors.primaryLight,
-            valueColor: AlwaysStoppedAnimation<Color>(
-              adherencePercentage >= 80 ? AppColors.success : 
-              adherencePercentage >= 60 ? AppColors.warning : AppColors.error,
+          Icon(icon, color: color, size: 24),
+          const SizedBox(height: 8),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: color,
             ),
-            minHeight: 8,
+          ),
+          const SizedBox(height: 4),
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: 12,
+              color: AppColors.textSecondary,
+            ),
+            textAlign: TextAlign.center,
           ),
         ],
       ),
     );
   }
 
-  /// 약물별 통계 카드
-  Widget _buildMedicationStatsCard(Medication medication, List<dynamic> logs, WidgetRef ref) {
-    final adherenceRate = ref.read(medicationLogProvider.notifier).getAdherenceRate(medication.id);
-    final adherencePercentage = (adherenceRate * 100).round();
-
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: AppCard(
-        child: Row(
-          children: [
-            Container(
-              width: 50,
-              height: 50,
-              decoration: BoxDecoration(
-                color: AppColors.primaryLight,
-                borderRadius: BorderRadius.circular(25),
-              ),
-              child: Icon(
-                Icons.medication,
-                color: AppColors.primary,
-                size: 24,
-              ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  AppText.titleMedium(medication.name),
-                  AppText.bodySmall('복용량: ${medication.dosage}'),
-                ],
-              ),
-            ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                AppText.titleMedium(
-                  '$adherencePercentage%',
-                  style: TextStyle(
-                    color: adherencePercentage >= 80 ? AppColors.success : 
-                           adherencePercentage >= 60 ? AppColors.warning : AppColors.error,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                AppText.bodySmall('최근 7일'),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  /// 주간 통계 카드
-  Widget _buildWeeklyStatsCard(List<dynamic> logs) {
-    final now = DateTime.now();
-    final weekDays = ['일', '월', '화', '수', '목', '금', '토'];
+  /// 복용률 추이 차트
+  Widget _buildAdherenceTrendChart() {
+    final data = _selectedPeriod == 'week' ? _mockWeeklyData : _mockMonthlyData;
     
     return AppCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          AppText.titleMedium('주간 복용 현황'),
-          const SizedBox(height: 12), // 16 -> 12로 줄임
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: List.generate(7, (index) {
-              final date = DateTime(now.year, now.month, now.day - (6 - index));
-              final dayLogs = logs.where((log) => 
-                log.takenAt.year == date.year &&
-                log.takenAt.month == date.month &&
-                log.takenAt.day == date.day &&
-                log.isTaken).length;
-              
-              return Column(
-                children: [
-                  AppText.bodySmall(weekDays[date.weekday % 7]),
-                  const SizedBox(height: 4),
-                  Container(
-                    width: 28, // 30 -> 28로 줄임
-                    height: 28, // 30 -> 28로 줄임
-                    decoration: BoxDecoration(
-                      color: dayLogs > 0 ? AppColors.success : AppColors.primaryLight,
-                      borderRadius: BorderRadius.circular(14),
+          AppText.titleMedium('복용률 추이'),
+          const SizedBox(height: 16),
+          SizedBox(
+            height: 200,
+            child: LineChart(
+              LineChartData(
+                gridData: FlGridData(show: false),
+                titlesData: FlTitlesData(
+                  leftTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      reservedSize: 40,
+                      getTitlesWidget: (value, meta) {
+                        return Text('${value.toInt()}%', style: const TextStyle(fontSize: 10));
+                      },
                     ),
-                    child: Center(
-                      child: AppText.bodySmall(
-                        '$dayLogs',
-                        style: TextStyle(
-                          color: dayLogs > 0 ? AppColors.white : AppColors.textSecondary,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+                  ),
+                  bottomTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      getTitlesWidget: (value, meta) {
+                        final index = value.toInt();
+                        if (index >= 0 && index < data.length) {
+                          return Text(data[index]['day'] ?? data[index]['week'], style: const TextStyle(fontSize: 10));
+                        }
+                        return const Text('');
+                      },
+                    ),
+                  ),
+                  topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                  rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                ),
+                borderData: FlBorderData(show: false),
+                lineBarsData: [
+                  LineChartBarData(
+                    spots: data.asMap().entries.map((entry) {
+                      final adherence = _selectedPeriod == 'week' 
+                          ? (entry.value['taken'] / entry.value['total'] * 100)
+                          : entry.value['adherence'];
+                      return FlSpot(entry.key.toDouble(), adherence);
+                    }).toList(),
+                    isCurved: true,
+                    color: AppColors.primary,
+                    barWidth: 3,
+                    dotData: FlDotData(show: true),
+                    belowBarData: BarAreaData(
+                      show: true,
+                      color: AppColors.primary.withValues(alpha: 0.1),
                     ),
                   ),
                 ],
-              );
-            }),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 일별 복용 현황 차트
+  Widget _buildDailyAdherenceChart() {
+    final data = _selectedPeriod == 'week' ? _mockWeeklyData : _mockMonthlyData;
+    
+    return AppCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          AppText.titleMedium('일별 복용 현황'),
+          const SizedBox(height: 16),
+          SizedBox(
+            height: 200,
+            child: BarChart(
+              BarChartData(
+                alignment: BarChartAlignment.spaceAround,
+                maxY: 100,
+                titlesData: FlTitlesData(
+                  leftTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      reservedSize: 40,
+                      getTitlesWidget: (value, meta) {
+                        return Text('${value.toInt()}%', style: const TextStyle(fontSize: 10));
+                      },
+                    ),
+                  ),
+                  bottomTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      getTitlesWidget: (value, meta) {
+                        final index = value.toInt();
+                        if (index >= 0 && index < data.length) {
+                          return Text(data[index]['day'] ?? data[index]['week'], style: const TextStyle(fontSize: 10));
+                        }
+                        return const Text('');
+                      },
+                    ),
+                  ),
+                  topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                  rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                ),
+                borderData: FlBorderData(show: false),
+                barGroups: data.asMap().entries.map((entry) {
+                  final adherence = _selectedPeriod == 'week' 
+                      ? (entry.value['taken'] / entry.value['total'] * 100)
+                      : entry.value['adherence'];
+                  return BarChartGroupData(
+                    x: entry.key,
+                    barRods: [
+                      BarChartRodData(
+                        toY: adherence,
+                        color: adherence >= 80 ? AppColors.success : adherence >= 60 ? AppColors.warning : AppColors.error,
+                        width: 20,
+                        borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
+                      ),
+                    ],
+                  );
+                }).toList(),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 약물별 상세 통계
+  Widget _buildMedicationDetailedStats() {
+    return AppCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          AppText.titleMedium('약물별 상세 통계'),
+          const SizedBox(height: 16),
+          ..._mockMedicationStats.map((medication) => _buildMedicationStatItem(medication)),
+        ],
+      ),
+    );
+  }
+
+  /// 개별 약물 통계 아이템
+  Widget _buildMedicationStatItem(Map<String, dynamic> medication) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Row(
+        children: [
+          Container(
+            width: 50,
+            height: 50,
+            decoration: BoxDecoration(
+              color: AppColors.primaryLight,
+              borderRadius: BorderRadius.circular(25),
+            ),
+            child: Icon(
+              Icons.medication,
+              color: AppColors.primary,
+              size: 24,
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                AppText.titleMedium(medication['name']),
+                AppText.bodySmall('총 ${medication['totalDoses']}회 중 ${medication['missedDoses']}회 미복용'),
+              ],
+            ),
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                '${medication['adherence']}%',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: medication['adherence'] >= 90 ? AppColors.success : 
+                         medication['adherence'] >= 80 ? AppColors.warning : AppColors.error,
+                ),
+              ),
+              AppText.bodySmall('복용률'),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 복용 패턴 분석
+  Widget _buildAdherencePatternAnalysis() {
+    return AppCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          AppText.titleMedium('복용 패턴 분석'),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: _buildPatternItem('최고 복용률', '100%', '목요일', AppColors.success),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: _buildPatternItem('최저 복용률', '60%', '토요일', AppColors.error),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: _buildPatternItem('평균 복용률', '85.7%', '전체 기간', AppColors.primary),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: _buildPatternItem('연속 복용', '3일', '최장 기록', AppColors.secondary),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 패턴 분석 아이템
+  Widget _buildPatternItem(String title, String value, String subtitle, Color color) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: color,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            title,
+            style: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          Text(
+            subtitle,
+            style: TextStyle(
+              fontSize: 10,
+              color: AppColors.textSecondary,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 인사이트 카드
+  Widget _buildInsightsCard() {
+    return AppCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.lightbulb, color: AppColors.secondary, size: 24),
+              const SizedBox(width: 8),
+              AppText.titleMedium('복용 인사이트'),
+            ],
+          ),
+          const SizedBox(height: 16),
+          _buildInsightItem(
+            '🎯 목표 달성',
+            '이번 주 복용률이 목표인 80%를 달성했습니다!',
+            AppColors.success,
+          ),
+          const SizedBox(height: 12),
+          _buildInsightItem(
+            '📈 개선 포인트',
+            '토요일 복용률이 낮습니다. 주말 알림을 설정해보세요.',
+            AppColors.warning,
+          ),
+          const SizedBox(height: 12),
+          _buildInsightItem(
+            '💡 팁',
+            '아침 복용률이 가장 높습니다. 다른 시간대도 이 패턴을 따라해보세요.',
+            AppColors.secondary,
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 인사이트 아이템
+  Widget _buildInsightItem(String emoji, String text, Color color) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        children: [
+          Text(emoji, style: const TextStyle(fontSize: 20)),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              text,
+              style: TextStyle(
+                fontSize: 14,
+                color: AppColors.textPrimary,
+              ),
+            ),
           ),
         ],
       ),

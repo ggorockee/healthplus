@@ -125,8 +125,6 @@ ThemeData buildLightTheme() {
       onSecondary: AppColors.textPrimary,
       surface: AppColors.surface,
       onSurface: AppColors.textPrimary,
-      background: AppColors.surface,
-      onBackground: AppColors.textPrimary,
     ),
     scaffoldBackgroundColor: AppColors.surface,
     textTheme: AppTypography.textTheme,
