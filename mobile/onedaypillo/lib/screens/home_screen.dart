@@ -226,7 +226,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ),
                 const SizedBox(width: 8),
                 AppText.bodyMedium(
-                  '좌로 스와이프하여 복용 체크 또는 편집',
+                  '토글 버튼으로 복용 체크, 편집/삭제 버튼 사용',
                   style: const TextStyle(
                     color: AppColors.white,
                     fontWeight: FontWeight.w600,
