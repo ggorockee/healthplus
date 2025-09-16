@@ -43,15 +43,37 @@ class _MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
         },
       ),
       appBar: AppBar(
-        title: Text(
-          _getAppBarTitle(),
-          style: const TextStyle(color: Colors.black),
+        title: Padding(
+          padding: const EdgeInsets.only(left: 8.0),
+          child: Text(
+            _getAppBarTitle(),
+            style: const TextStyle(
+              color: Colors.black,
+              fontSize: 20,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
         ),
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
         elevation: 0,
         centerTitle: false,
+        toolbarHeight: 60,
         actions: [
+          // 설정 아이콘
+          IconButton(
+            onPressed: () {
+              // TODO: 설정 화면으로 이동
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('설정 기능은 준비 중입니다')),
+              );
+            },
+            icon: const Icon(
+              Icons.settings,
+              color: Colors.black,
+              size: 24,
+            ),
+          ),
           PopupMenuButton<String>(
             onSelected: (value) {
               if (value == 'logout') {
@@ -71,15 +93,16 @@ class _MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
               ),
             ],
             child: Padding(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.only(right: 16.0, top: 8.0, bottom: 8.0),
               child: CircleAvatar(
-                radius: 16,
+                radius: 18,
                 backgroundColor: const Color(0xFF4CAF50),
                 child: Text(
                   currentUser?.email.substring(0, 1).toUpperCase() ?? 'U',
                   style: const TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
+                    fontSize: 16,
                   ),
                 ),
               ),

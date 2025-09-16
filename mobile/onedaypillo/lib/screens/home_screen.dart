@@ -68,23 +68,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 const SizedBox(height: 8),
-                Text(
-                  'Today',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.primary,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  _getTodayDateString(),
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: AppColors.textSecondary,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
+                _buildWeeklyCalendar(),
                 const SizedBox(height: 16),
               ],
             ),
@@ -304,11 +288,65 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  /// 오늘 날짜 문자열 반환
-  String _getTodayDateString() {
+  /// 주간 달력 빌드
+  Widget _buildWeeklyCalendar() {
     final now = DateTime.now();
-    final weekdays = ['일', '월', '화', '수', '목', '금', '토'];
-    final weekday = weekdays[now.weekday % 7];
-    return '${now.year}년 ${now.month}월 ${now.day}일 ($weekday)';
+    final weekdays = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+    
+    // 이번 주의 시작일 (일요일) 계산
+    final startOfWeek = now.subtract(Duration(days: now.weekday % 7));
+    
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Column(
+        children: [
+          // 요일 표시
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: List.generate(7, (index) {
+              final day = startOfWeek.add(Duration(days: index));
+              final isToday = day.day == now.day && day.month == now.month && day.year == now.year;
+              
+              return Expanded(
+                child: Column(
+                  children: [
+                    // 요일 약어
+                    Text(
+                      weekdays[index],
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        color: isToday ? AppColors.primary : AppColors.textSecondary,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    // 날짜
+                    Container(
+                      width: 32,
+                      height: 32,
+                      decoration: BoxDecoration(
+                        color: isToday ? AppColors.primary : Colors.transparent,
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Center(
+                        child: Text(
+                          '${day.day}',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: isToday ? AppColors.white : AppColors.textPrimary,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }),
+          ),
+        ],
+      ),
+    );
   }
+
 }
