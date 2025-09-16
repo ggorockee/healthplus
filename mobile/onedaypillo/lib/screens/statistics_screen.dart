@@ -19,11 +19,11 @@ class StatisticsScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: AppColors.surface,
       appBar: AppBar(
-        title: AppText.titleLarge('복용 통계'),
-        backgroundColor: AppColors.primary,
-        foregroundColor: AppColors.textOnPrimary,
+        backgroundColor: AppColors.white,
+        foregroundColor: AppColors.textPrimary,
         elevation: 0,
-        centerTitle: true,
+        toolbarHeight: 80,
+        flexibleSpace: _buildWeeklyCalendar(),
       ),
       body: medications.isEmpty
           ? _buildEmptyState()
@@ -51,6 +51,61 @@ class StatisticsScreen extends ConsumerWidget {
                 ],
               ),
             ),
+    );
+  }
+
+  /// 주간 달력 빌드
+  Widget _buildWeeklyCalendar() {
+    final now = DateTime.now();
+    final startOfWeek = now.subtract(Duration(days: now.weekday % 7));
+    final weekdays = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+    
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: List.generate(7, (index) {
+          final day = startOfWeek.add(Duration(days: index));
+          final isToday = day.day == now.day && day.month == now.month && day.year == now.year;
+          
+          return Expanded(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // 요일 약어
+                Text(
+                  weekdays[index],
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w500,
+                    color: isToday ? AppColors.primary : AppColors.textSecondary,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                // 날짜
+                Container(
+                  width: 28,
+                  height: 28,
+                  decoration: BoxDecoration(
+                    color: isToday ? AppColors.primary : Colors.transparent,
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: Center(
+                    child: Text(
+                      '${day.day}',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: isToday ? AppColors.white : AppColors.textPrimary,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        }),
+      ),
     );
   }
 
