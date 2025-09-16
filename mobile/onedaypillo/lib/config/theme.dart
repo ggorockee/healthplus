@@ -6,39 +6,43 @@ import 'package:flutter/material.dart';
 class AppColors {
   AppColors._();
 
-  // Primary brand colors (녹색 계열)
-  static const Color primary = Color(0xFF4CAF50); // 메인 녹색
-  static const Color primaryDark = Color(0xFF388E3C); // 다크 녹색
-  static const Color primaryLight = Color(0xFFE8F5E8); // 라이트 녹색
+  // Primary brand colors (모던 블루 계열)
+  static const Color primary = Color(0xFF2563EB); // 모던 블루
+  static const Color primaryDark = Color(0xFF1D4ED8); // 다크 블루
+  static const Color primaryLight = Color(0xFFEFF6FF); // 라이트 블루
 
-  // Semantic accent
-  static const Color accentYellow = Color(0xFFFFC97E);
-  static const Color accentPeach = Color(0xFFFEB18F);
-  static const Color accentMint = Color(0xFFAFDBC5);
+  // Secondary colors (세련된 보조 색상)
+  static const Color secondary = Color(0xFF7C3AED); // 보라색
+  static const Color secondaryLight = Color(0xFFF3F0FF); // 라이트 보라
+
+  // Accent colors (세련된 포인트 색상)
+  static const Color accent = Color(0xFF10B981); // 에메랄드 그린
+  static const Color accentLight = Color(0xFFECFDF5); // 라이트 그린
 
   // Text colors
-  static const Color textPrimary = Color(0xFF3F414E);
-  static const Color textSecondary = Color(0xFFA1A4B2);
-  static const Color textOnPrimary = Color(0xFFF6F1FB);
-  static const Color textOnDark = Color(0xFFEBEAEC);
+  static const Color textPrimary = Color(0xFF1F2937); // 다크 그레이
+  static const Color textSecondary = Color(0xFF6B7280); // 미디엄 그레이
+  static const Color textOnPrimary = Color(0xFFFFFFFF);
+  static const Color textOnDark = Color(0xFFF9FAFB);
 
-  // Surface
+  // Surface colors
   static const Color surface = Color(0xFFFFFFFF);
-  static const Color surfaceAlt = Color(0xFFF5F5F9);
-  static const Color surfaceDark = Color(0xFF03174C);
+  static const Color surfaceAlt = Color(0xFFF9FAFB); // 매우 연한 그레이
+  static const Color surfaceDark = Color(0xFF111827);
 
-  // Utility
+  // Utility colors
   static const Color white = Color(0xFFFFFFFF);
   static const Color black = Color(0xFF000000);
 
-  // Status colors
-  static const Color success = Color(0xFF4CAF50);
-  static const Color error = Color(0xFFE57373);
-  static const Color warning = Color(0xFFFFB74D);
-  static const Color info = Color(0xFF64B5F6);
+  // Status colors (세련된 색상)
+  static const Color success = Color(0xFF10B981); // 에메랄드
+  static const Color error = Color(0xFFEF4444); // 모던 레드
+  static const Color warning = Color(0xFFF59E0B); // 앰버
+  static const Color info = Color(0xFF3B82F6); // 블루
 
   // Border colors
-  static const Color border = Color(0xFFE0E0E0);
+  static const Color border = Color(0xFFE5E7EB);
+  static const Color borderLight = Color(0xFFF3F4F6);
 }
 
 class AppTypography {

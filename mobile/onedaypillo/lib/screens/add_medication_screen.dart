@@ -227,7 +227,7 @@ class _AddMedicationScreenState extends ConsumerState<AddMedicationScreen> {
       name: _nameController.text.trim(),
       dosage: _dosageController.text.trim(),
       notificationTime: _selectedTime,
-      repeatDays: _selectedDays,
+      repeatDays: _selectedDays.isEmpty ? [0, 1, 2, 3, 4, 5, 6] : _selectedDays, // 요일 미선택 시 매일로 설정
       createdAt: DateTime.now(),
     );
 
