@@ -51,9 +51,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return Scaffold(
       backgroundColor: AppColors.surface,
       appBar: AppBar(
-        title: AppText.titleLarge('하루 알약'),
-        backgroundColor: AppColors.primary,
-        foregroundColor: AppColors.textOnPrimary,
+        title: AppText.titleLarge('오늘의 약'),
+        backgroundColor: AppColors.white,
+        foregroundColor: AppColors.textPrimary,
         elevation: 0,
         centerTitle: true,
       ),
