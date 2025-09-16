@@ -17,6 +17,7 @@ class HistoryScreen extends ConsumerStatefulWidget {
 
 class _HistoryScreenState extends ConsumerState<HistoryScreen> {
   DateTime _selectedDate = DateTime.now();
+  String _filterType = 'all'; // 'all', 'not_taken', 'taken'
 
   @override
   Widget build(BuildContext context) {
@@ -53,17 +54,23 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
       ),
       body: Column(
         children: [
+          // 필터 칩
+          _buildFilterChips(),
           // 복용 기록 목록
           Expanded(
             child: medications.isEmpty
                 ? _buildEmptyState()
-                : ListView.builder(
-                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 100), // 하단 여백 추가
-                    itemCount: medications.length,
-                    itemBuilder: (context, index) {
+                : Builder(
+                    builder: (context) {
                       final sortedMedications = _getSortedMedications(medications, logs);
-                      final medication = sortedMedications[index];
-                      return _buildMedicationHistoryCard(medication, logs);
+                      return ListView.builder(
+                        padding: const EdgeInsets.fromLTRB(16, 16, 16, 100), // 하단 여백 추가
+                        itemCount: sortedMedications.length,
+                        itemBuilder: (context, index) {
+                          final medication = sortedMedications[index];
+                          return _buildMedicationHistoryCard(medication, logs);
+                        },
+                      );
                     },
                   ),
           ),
@@ -72,9 +79,76 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
     );
   }
 
-  /// 약물을 복용 상태에 따라 정렬 (미복용 먼저, 복용완료 나중에)
+  /// 필터 칩 빌드
+  Widget _buildFilterChips() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      child: Row(
+        children: [
+          _buildFilterChip('전체', 'all'),
+          const SizedBox(width: 8),
+          _buildFilterChip('미복용', 'not_taken'),
+          const SizedBox(width: 8),
+          _buildFilterChip('복용완료', 'taken'),
+        ],
+      ),
+    );
+  }
+
+  /// 개별 필터 칩 빌드
+  Widget _buildFilterChip(String label, String filterType) {
+    final isSelected = _filterType == filterType;
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _filterType = filterType;
+        });
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected ? AppColors.primary : AppColors.primaryLight,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isSelected ? AppColors.primary : AppColors.border,
+            width: 1,
+          ),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            color: isSelected ? AppColors.white : AppColors.primary,
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// 약물을 복용 상태에 따라 정렬 및 필터링
   List<Medication> _getSortedMedications(List<Medication> medications, List<dynamic> logs) {
-    return List.from(medications)..sort((a, b) {
+    // 먼저 필터링
+    List<Medication> filteredMedications = medications.where((medication) {
+      final dayLogs = logs.where((log) => 
+          log.medicationId == medication.id && 
+          _isSameDay(log.takenAt, _selectedDate)).toList();
+      
+      final isTaken = dayLogs.isNotEmpty && dayLogs.first.isTaken;
+      
+      switch (_filterType) {
+        case 'not_taken':
+          return !isTaken;
+        case 'taken':
+          return isTaken;
+        case 'all':
+        default:
+          return true;
+      }
+    }).toList();
+    
+    // 그 다음 정렬 (미복용 먼저, 복용완료 나중에)
+    return filteredMedications..sort((a, b) {
       final aLogs = logs.where((log) => 
           log.medicationId == a.id && 
           _isSameDay(log.takenAt, _selectedDate)).toList();
