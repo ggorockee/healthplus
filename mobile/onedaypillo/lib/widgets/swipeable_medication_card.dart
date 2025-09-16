@@ -88,32 +88,47 @@ class _SwipeableMedicationCardState extends State<SwipeableMedicationCard> {
     );
   }
 
-  /// 토글 버튼
+  /// 토글 버튼 (좌우 스위치)
   Widget _buildToggleButton() {
-    return Container(
-      width: 60,
-      height: 36,
-      decoration: BoxDecoration(
-        color: widget.isTaken ? AppColors.tertiary : AppColors.primary,
-        borderRadius: BorderRadius.circular(18),
-        boxShadow: [
-          BoxShadow(
-            color: (widget.isTaken ? AppColors.tertiary : AppColors.primary).withValues(alpha: 0.3),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(18),
-          onTap: widget.onToggleTaken,
-          child: Center(
-            child: Icon(
-              widget.isTaken ? Icons.check : Icons.radio_button_unchecked,
+    return GestureDetector(
+      onTap: widget.onToggleTaken,
+      child: Container(
+        width: 60,
+        height: 32,
+        decoration: BoxDecoration(
+          color: widget.isTaken ? AppColors.primary : AppColors.border,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.1),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: AnimatedAlign(
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeInOut,
+          alignment: widget.isTaken ? Alignment.centerRight : Alignment.centerLeft,
+          child: Container(
+            width: 28,
+            height: 28,
+            margin: const EdgeInsets.all(2),
+            decoration: BoxDecoration(
               color: AppColors.white,
-              size: 20,
+              borderRadius: BorderRadius.circular(14),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.2),
+                  blurRadius: 4,
+                  offset: const Offset(0, 1),
+                ),
+              ],
+            ),
+            child: Icon(
+              widget.isTaken ? Icons.check : Icons.close,
+              color: widget.isTaken ? AppColors.primary : AppColors.textSecondary,
+              size: 16,
             ),
           ),
         ),
