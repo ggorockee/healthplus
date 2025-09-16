@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/home_provider.dart';
 import '../widgets/home_widgets.dart';
-import '../widgets/banner_ad_widget.dart';
-import '../widgets/native_ad_widget.dart';
+// 광고 위젯은 현재 사용하지 않음
 import 'medication_registration_screen.dart';
 import 'medication_history_screen.dart';
 import 'subscription_screen.dart';
@@ -17,59 +16,76 @@ class HomeScreen extends ConsumerWidget {
     final medications = ref.watch(homeProvider);
 
     return Scaffold(
-      backgroundColor: Colors.grey.shade50,
-      appBar: AppBar(
-        title: const Text(
-          '약 관리',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
+      backgroundColor: const Color(0xFFF8F9FA),
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(56),
+        child: Container(
+          color: const Color(0xFF4CAF50),
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: SafeArea(
+            bottom: false,
+            child: Row(
+              children: [
+                const Expanded(
+                  child: Text(
+                    '안녕하세요, 김○○님!',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                IconButton(
+                  onPressed: () {},
+                  icon: const Icon(Icons.notifications, color: Colors.white),
+                ),
+                const SizedBox(width: 8),
+                Container(
+                  width: 32,
+                  height: 32,
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.person, color: Color(0xFF4CAF50), size: 20),
+                ),
+              ],
+            ),
           ),
         ),
-        backgroundColor: const Color(0xFF4CAF50),
-        foregroundColor: Colors.white,
-        elevation: 0,
-        centerTitle: true,
       ),
       body: Column(
         children: [
           Expanded(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.fromLTRB(16, 20, 16, 0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // 상단 배너 광고 (Android만) - 임시 비활성화
-                  // const TopBannerAdWidget(),
-                  
-                  // const SizedBox(height: 16),
-                  
-                  // 오늘 복용할 약 섹션
                   _buildTodayMedicationSection(context, ref, medications),
-                  
                   const SizedBox(height: 24),
-                  
-                  // 네이티브 광고 (약 목록 중간) - 임시 비활성화
-                  // if (medications.length > 2) ...[
-                  //   const MedicationListNativeAdWidget(),
-                  //   const SizedBox(height: 16),
-                  // ],
-                  
-                  // 다음 복용 예정 섹션
                   const NextDoseCardWidget(),
-                  
                   const SizedBox(height: 24),
-                  
-                  // 바로가기 섹션
                   _buildQuickActionsSection(context),
+                  const SizedBox(height: 24),
                 ],
               ),
             ),
           ),
-          // 하단 고정 배너 광고 - 임시 비활성화
-          // const BannerAdWidget(),
+          _BottomNavBar(
+            onTapAdd: () => _showAddMedicationDialog(context),
+          ),
         ],
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.only(bottom: 20, right: 20),
+        child: FloatingActionButton(
+          backgroundColor: const Color(0xFF4CAF50),
+          onPressed: () => _showAddMedicationDialog(context),
+          child: const Icon(Icons.add, color: Colors.white),
+        ),
       ),
     );
   }
@@ -276,6 +292,93 @@ class HomeScreen extends ConsumerWidget {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => const SubscriptionScreen(),
+      ),
+    );
+  }
+}
+
+/// 하단 네비게이션 바 (와이어프레임 스타일)
+class _BottomNavBar extends StatelessWidget {
+  const _BottomNavBar({
+    required this.onTapAdd,
+  });
+
+  final VoidCallback onTapAdd;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 60,
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Color(0x14000000),
+            blurRadius: 8,
+            offset: Offset(0, -2),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          _BottomItem(
+            icon: Icons.home,
+            label: '홈',
+            isActive: true,
+            onTap: () {},
+          ),
+          _BottomItem(
+            icon: Icons.medication,
+            label: '내약',
+            onTap: () {},
+          ),
+          _BottomItem(
+            icon: Icons.family_restroom,
+            label: '함께',
+            onTap: () {},
+          ),
+          _BottomItem(
+            icon: Icons.bar_chart,
+            label: '통계',
+            onTap: () {},
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _BottomItem extends StatelessWidget {
+  const _BottomItem({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+    this.isActive = false,
+  });
+
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+  final bool isActive;
+
+  @override
+  Widget build(BuildContext context) {
+    final Color color = isActive ? const Color(0xFF4CAF50) : const Color(0xFF9CA3AF);
+    final FontWeight weight = isActive ? FontWeight.bold : FontWeight.w400;
+    return Expanded(
+      child: InkWell(
+        onTap: onTap,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, color: color, size: 24),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              style: TextStyle(fontSize: 12, color: color, fontWeight: weight),
+            ),
+          ],
+        ),
       ),
     );
   }
