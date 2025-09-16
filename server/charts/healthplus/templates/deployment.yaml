@@ -44,13 +44,9 @@ spec:
           envFrom:
             - configMapRef:
                 name: {{ include "healthplus.fullname" . }}-config
-            # Secret은 외부에서 관리되므로 존재할 때만 참조
-            {{- if .Values.secrets }}
-            {{- range .Values.secrets }}
+            # Secret은 외부에서 미리 생성되어야 함 (healthplus-secrets)
             - secretRef:
-                name: {{ .name }}
-            {{- end }}
-            {{- end }}
+                name: healthplus-secrets
           livenessProbe:
             {{- include "healthplus.livenessProbe" . | nindent 12 }}
           readinessProbe:

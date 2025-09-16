@@ -134,12 +134,17 @@ development:
     timeoutSeconds: 3
     failureThreshold: 5
 
-# Secret 설정 (Helm에서 직접 관리하지 않음 - 외부에서 생성)
-# secrets:
-#   - name: healthplus-secrets
-#     keys:
-#       - SUPABASE_URL
-#       - SUPABASE_ANON_KEY
-#       - SUPABASE_SERVICE_ROLE_KEY
-#       - JWT_SECRET
-#       - REDIS_URL
+# Secret 설정
+# Secret은 Helm Chart에서 생성하지 않고 외부에서 미리 생성해야 합니다.
+# 필수 Secret 이름: healthplus-secrets
+# 필수 Secret 키들:
+#   - SUPABASE_URL
+#   - SUPABASE_ANON_KEY
+#   - SUPABASE_SERVICE_ROLE_KEY
+#   - JWT_SECRET
+#   - REDIS_URL
+#
+# Secret 생성 방법:
+# 1. charts/secret-examples/ 디렉토리의 YAML 파일 사용
+# 2. create-secrets.sh 스크립트 사용
+# 3. kubectl create secret 명령어 직접 사용
