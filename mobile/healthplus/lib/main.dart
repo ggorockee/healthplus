@@ -11,6 +11,7 @@ import 'screens/login_screen.dart';
 import 'config/supabase_config.dart';
 import 'config/env_config.dart';
 import 'services/admob_service.dart';
+import 'screens/splash_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -93,7 +94,7 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
         fontFamily: 'Pretendard',
       ),
-      home: const AppInitializer(),
+      home: const SplashScreen(),
       debugShowCheckedModeBanner: false,
       routes: {
         '/home': (context) => const HomeScreen(),
