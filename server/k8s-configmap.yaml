@@ -1,0 +1,183 @@
+---
+# Development Environment ConfigMap
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: healthplus-config-dev
+  namespace: healthplus-dev
+data:
+  APP_ENV: "development"
+  HOST: "0.0.0.0"
+  PORT: "8000"
+  DEBUG: "True"
+  ENVIRONMENT: "development"
+  LOG_LEVEL: "debug"
+  APP_NAME: "내 약 관리"
+  APP_VERSION: "1.0.0"
+  NOTIFICATION_ENABLED: "true"
+  PUSH_NOTIFICATION_ENABLED: "true"
+  JWT_EXPIRY_HOURS: "24"
+  JWT_ALGORITHM: "HS256"
+  # Gunicorn settings (not used in dev but available)
+  GUNICORN_WORKERS: "1"
+  GUNICORN_LOG_LEVEL: "debug"
+
+---
+# Production Environment ConfigMap
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: healthplus-config-prod
+  namespace: healthplus-prod
+data:
+  APP_ENV: "production"
+  HOST: "0.0.0.0"
+  PORT: "8000"
+  DEBUG: "False"
+  ENVIRONMENT: "production"
+  LOG_LEVEL: "info"
+  APP_NAME: "내 약 관리"
+  APP_VERSION: "1.0.0"
+  NOTIFICATION_ENABLED: "true"
+  PUSH_NOTIFICATION_ENABLED: "true"
+  JWT_EXPIRY_HOURS: "24"
+  JWT_ALGORITHM: "HS256"
+  # Gunicorn production settings
+  GUNICORN_WORKERS: "4"
+  GUNICORN_WORKER_CONNECTIONS: "1000"
+  GUNICORN_MAX_REQUESTS: "1000"
+  GUNICORN_MAX_REQUESTS_JITTER: "50"
+  GUNICORN_TIMEOUT: "30"
+  GUNICORN_KEEPALIVE: "5"
+  GUNICORN_LOG_LEVEL: "info"
+  GUNICORN_PRELOAD_APP: "true"
+
+---
+# Development Environment Secret
+apiVersion: v1
+kind: Secret
+metadata:
+  name: healthplus-secrets-dev
+  namespace: healthplus-dev
+type: Opaque
+data:
+  # Base64 encoded values
+  SUPABASE_URL: aHR0cHM6Ly95amtmanl0c2ZucGthaHVpYWpqdi5zdXBhYmFzZS5jbw==
+  SUPABASE_ANON_KEY: ZXlKaGJHY2lPaUpJVXpJMU5pSXNJblI1Y0NJNlNVcFhWQ0o5LmV5SnBjM01pT2lKemRYQmhZbUZ6WlNJc0luSmxaaUk2SW5scWEyWnFlWFJ6Wm01d2EyRm9kV2xoYW1wMklpd2ljbTlzWlNJNkltRnViMjRpTENKcFlYUWlPakUzOVRjNU5EUXdOaklzSW1WNGNDSTZNakEzTXpVeU1EQTJNbjAuM0hwYk5tTTNqRDVqeS1CMzhLZ2hYd0tKd0plMlpNQUN4QXNkSEdsdVJ4TQ==
+  SUPABASE_SERVICE_ROLE_KEY: ZXlKaGJHY2lPaUpJVXpJMU5pSXNJblI1Y0NJNlNVcFhWQ0o5LmV5SnBjM01pT2lKemRYQmhZbUZ6WlNJc0luSmxaaUk2SW5scWEyWnFlWFJ6Wm01d2EyRm9kV2xoYW1wMklpd2ljbTlzWlNJNkluTmxjblpwWTJWZmNtOXNaU0lzSW1saGRDSTZNVGMxTnprME5EQTJNaXdpWlhod0lqb3lNRGN6TlRJd01EWXlmUS5JV1R0ME01OW5wVHhDRk1iN0c0Y3ZRYU5lRHVlbXVSX0dUODItTUdzSFlnPT0=
+  JWT_SECRET: TVRRMFdDdFNkVWt4TUZOd1p6bFlRMU5JYkcxVVpVVlFXV2xyWlhCTGEwRmhRMlZZWjFadlMwbHFRblJVTTBobFZFSndka3cxZFc0MVVFc3ljM1ZNWjJkWFJsTktTVWRHYWxKME5qbFRaemxtT1ZCM05RBUFBPT0=
+  REDIS_URL: Y21Wa2FYTTZMeTlzYjJOaGJHaHZjM1E2TmpNM09RPT0=
+
+---
+# Production Environment Secret
+apiVersion: v1
+kind: Secret
+metadata:
+  name: healthplus-secrets-prod
+  namespace: healthplus-prod
+type: Opaque
+data:
+  # Base64 encoded values - Replace with actual production values
+  SUPABASE_URL: aHR0cHM6Ly91YWJyaHpxdHh4Ymh2eGd3cGFraS5zdXBhYmFzZS5jbw==
+  SUPABASE_ANON_KEY: ZXlKaGJHY2lPaUpJVXpJMU5pSXNJblI1Y0NJNlNVcFhWQ0o5LmV5SnBjM01pT2lKemRYQmhZbUZ6WlNJc0luSmxaaUk2SW5WaFluSm9lblIwZUhoa2FIWjRaM2R3WVd0cElpd2ljbTlzWlNJNkltRnViMjRpTENKcFlYUWlPakUzTlRjNU9EWXlNREVzSW1WNGNDSTZNakEzTXpVMk1qSXdNWDAuaUhCQ2pDaTEydEt4NFBfbWo2dDUtdUtZbVhvcTV2TGUzM2o5QURXQUZ5TQ==
+  SUPABASE_SERVICE_ROLE_KEY: ZXlKaGJHY2lPaUpJVXpJMU5pSXNJblI1Y0NJNlNVcFhWQ0o5LmV5SnBjM01pT2lKemRYQmhZbUZ6WlNJc0luSmxaaUk2SW5WaFluSm9lblIwZUhoa2FIWjRaM2R3WVd0cElpd2ljbTlzWlNJNkluTmxjblpwWTJWZmNtOXNaU0lzSW1saGRDSTZNVGMxTnprNE5qSXdNVHdpWlhod0lqb3lNRGN6TlRZeU1qQXhmUS5aYlB6NGRzdF81clVuTUROOW0zeVkyZ3FuOFF4YUM0UDNvX0pQWlJFRUhjPT0=
+  JWT_SECRET: VDJ4eU4xcE5UVVJYYVVzelQwOHJURnhKVFZWWE1tSkhNVEFKUWtoMVUxaGFRbUZoUlZGR1RrZDBNekIwU0VsMGJHbE9RMnA0Y0dGdk0ycDVXVUF3VTJOeWIxaDVNVUZsVVVzclZGQlVhRk56WTJKVFMwUUxkM2R3YUJBPT0=
+  REDIS_URL: Y21Wa2FYTTZMeTl3Y205a2RXTjBhVzl1TFhKbFpHbHpMWFZ5YkRvMk16YzU=
+
+---
+# Development Deployment Example
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: healthplus-dev
+  namespace: healthplus-dev
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: healthplus
+      env: development
+  template:
+    metadata:
+      labels:
+        app: healthplus
+        env: development
+    spec:
+      containers:
+      - name: healthplus
+        image: healthplus:latest
+        ports:
+        - containerPort: 8000
+        envFrom:
+        - configMapRef:
+            name: healthplus-config-dev
+        - secretRef:
+            name: healthplus-secrets-dev
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 5
+          periodSeconds: 5
+
+---
+# Production Deployment Example
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: healthplus-prod
+  namespace: healthplus-prod
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: healthplus
+      env: production
+  template:
+    metadata:
+      labels:
+        app: healthplus
+        env: production
+    spec:
+      containers:
+      - name: healthplus
+        image: healthplus:latest
+        ports:
+        - containerPort: 8000
+        envFrom:
+        - configMapRef:
+            name: healthplus-config-prod
+        - secretRef:
+            name: healthplus-secrets-prod
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "200m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 5
+          periodSeconds: 5
