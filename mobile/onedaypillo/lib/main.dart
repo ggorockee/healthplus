@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'config/theme.dart';
+import 'config/supabase_config.dart';
 import 'providers/auth_provider.dart';
 import 'models/user.dart';
 import 'screens/login_screen.dart';
@@ -9,6 +10,9 @@ import 'screens/main_navigation_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // Supabase 초기화
+  await SupabaseConfig.initialize();
   
   // AdMob 초기화
   await MobileAds.instance.initialize();

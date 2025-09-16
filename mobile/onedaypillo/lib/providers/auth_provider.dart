@@ -1,7 +1,6 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/user.dart';
-import '../services/simple_auth_service.dart';
+import '../services/supabase_auth_service.dart';
 
 /// 인증 상태 관리 프로바이더
 class AuthNotifier extends StateNotifier<AuthState> {
@@ -15,10 +14,10 @@ class AuthNotifier extends StateNotifier<AuthState> {
       state = state.copyWith(status: AuthStatus.loading);
       
       // 데모 계정 생성
-      await SimpleAuthService.createDemoAccount();
+      await SupabaseAuthService.createDemoAccount();
       
       // 현재 사용자 확인
-      final user = await SimpleAuthService.getCurrentUser();
+      final user = SupabaseAuthService.currentUser;
       
       if (user != null) {
         state = state.copyWith(
@@ -41,7 +40,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     try {
       state = state.copyWith(status: AuthStatus.loading);
       
-      final user = await SimpleAuthService.signUpWithEmail(email, password);
+      final user = await SupabaseAuthService.signUpWithEmail(email, password);
       
       if (user != null) {
         state = state.copyWith(
@@ -67,7 +66,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     try {
       state = state.copyWith(status: AuthStatus.loading);
       
-      final user = await SimpleAuthService.signInWithEmail(email, password);
+      final user = await SupabaseAuthService.signInWithEmail(email, password);
       
       if (user != null) {
         state = state.copyWith(
@@ -91,7 +90,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
   /// 로그아웃
   Future<void> signOut() async {
     try {
-      await SimpleAuthService.signOut();
+      await SupabaseAuthService.signOut();
       state = state.copyWith(
         status: AuthStatus.unauthenticated,
         user: null,
