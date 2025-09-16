@@ -26,38 +26,33 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
     return Scaffold(
       backgroundColor: AppColors.surface,
       appBar: AppBar(
-        title: AppText.titleLarge('복용 기록'),
-        backgroundColor: AppColors.primary,
-        foregroundColor: AppColors.textOnPrimary,
+        backgroundColor: AppColors.white,
+        foregroundColor: AppColors.textPrimary,
         elevation: 0,
         centerTitle: true,
-      ),
-      body: Column(
-        children: [
-          // 날짜 선택
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(16),
-            color: AppColors.primaryLight,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        toolbarHeight: 80,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [AppColors.white, AppColors.primaryLight],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+            ),
+          ),
+          child: SafeArea(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                IconButton(
-                  onPressed: _previousDay,
-                  icon: const Icon(Icons.chevron_left),
-                ),
-                GestureDetector(
-                  onTap: _selectDate,
-                  child: AppText.titleMedium(_getDateString(_selectedDate)),
-                ),
-                IconButton(
-                  onPressed: _nextDay,
-                  icon: const Icon(Icons.chevron_right),
-                ),
+                const SizedBox(height: 4),
+                _buildWeeklyCalendar(),
+                const SizedBox(height: 8),
               ],
             ),
           ),
-          
+        ),
+      ),
+      body: Column(
+        children: [
           // 복용 기록 목록
           Expanded(
             child: medications.isEmpty
@@ -66,12 +61,103 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                     padding: const EdgeInsets.fromLTRB(16, 16, 16, 100), // 하단 여백 추가
                     itemCount: medications.length,
                     itemBuilder: (context, index) {
-                      final medication = medications[index];
+                      final sortedMedications = _getSortedMedications(medications, logs);
+                      final medication = sortedMedications[index];
                       return _buildMedicationHistoryCard(medication, logs);
                     },
                   ),
           ),
         ],
+      ),
+    );
+  }
+
+  /// 약물을 복용 상태에 따라 정렬 (미복용 먼저, 복용완료 나중에)
+  List<Medication> _getSortedMedications(List<Medication> medications, List<dynamic> logs) {
+    return List.from(medications)..sort((a, b) {
+      final aLogs = logs.where((log) => 
+          log.medicationId == a.id && 
+          _isSameDay(log.takenAt, _selectedDate)).toList();
+      final bLogs = logs.where((log) => 
+          log.medicationId == b.id && 
+          _isSameDay(log.takenAt, _selectedDate)).toList();
+      
+      final aIsTaken = aLogs.isNotEmpty && aLogs.first.isTaken;
+      final bIsTaken = bLogs.isNotEmpty && bLogs.first.isTaken;
+      
+      // 미복용(false)을 먼저, 복용완료(true)를 나중에
+      if (aIsTaken && !bIsTaken) return 1;
+      if (!aIsTaken && bIsTaken) return -1;
+      return 0;
+    });
+  }
+
+  /// 주간 달력 빌드
+  Widget _buildWeeklyCalendar() {
+    final weekdays = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+    
+    // 선택된 날짜의 주 시작일 (일요일) 계산
+    final startOfWeek = _selectedDate.subtract(Duration(days: _selectedDate.weekday % 7));
+    
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: List.generate(7, (index) {
+          final day = startOfWeek.add(Duration(days: index));
+          final isSelected = day.day == _selectedDate.day && 
+                            day.month == _selectedDate.month && 
+                            day.year == _selectedDate.year;
+          final isToday = day.day == DateTime.now().day && 
+                         day.month == DateTime.now().month && 
+                         day.year == DateTime.now().year;
+          
+          return Expanded(
+            child: GestureDetector(
+              onTap: () {
+                setState(() {
+                  _selectedDate = day;
+                });
+              },
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // 요일 약어
+                  Text(
+                    weekdays[index],
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w500,
+                      color: isSelected ? AppColors.primary : AppColors.textSecondary,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  // 날짜
+                  Container(
+                    width: 28,
+                    height: 28,
+                    decoration: BoxDecoration(
+                      color: isSelected ? AppColors.primary : 
+                             isToday ? AppColors.primary.withValues(alpha: 0.3) : Colors.transparent,
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: Center(
+                      child: Text(
+                        '${day.day}',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: isSelected ? AppColors.white : 
+                                 isToday ? AppColors.primary : AppColors.textPrimary,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }),
       ),
     );
   }
@@ -125,12 +211,12 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                   width: 50,
                   height: 50,
                   decoration: BoxDecoration(
-                    color: isTaken ? AppColors.primary : AppColors.primaryLight,
+                    color: isTaken ? AppColors.tertiary : AppColors.primary,
                     borderRadius: BorderRadius.circular(25),
                   ),
                   child: Icon(
-                    isTaken ? Icons.check : Icons.medication,
-                    color: isTaken ? AppColors.textOnPrimary : AppColors.primary,
+                    isTaken ? Icons.check_circle : Icons.medication,
+                    color: AppColors.white,
                     size: 24,
                   ),
                 ),
@@ -142,10 +228,32 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      AppText.titleMedium(medication.name),
+                      Text(
+                        medication.name,
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
+                          color: isTaken ? AppColors.textSecondary : AppColors.textPrimary,
+                          decoration: isTaken ? TextDecoration.lineThrough : null,
+                        ),
+                      ),
                       const SizedBox(height: 4),
-                      AppText.bodySmall('복용량: ${medication.dosage}'),
-                      AppText.bodySmall('시간: ${medication.notificationTime.format(context)}'),
+                      Text(
+                        '복용량: ${medication.dosage}',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: isTaken ? AppColors.textSecondary : AppColors.textSecondary,
+                          decoration: isTaken ? TextDecoration.lineThrough : null,
+                        ),
+                      ),
+                      Text(
+                        '시간: ${medication.notificationTime.format(context)}',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: isTaken ? AppColors.textSecondary : AppColors.textSecondary,
+                          decoration: isTaken ? TextDecoration.lineThrough : null,
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -154,12 +262,16 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
-                    color: isTaken ? AppColors.success : AppColors.error,
+                    color: isTaken ? AppColors.tertiary : AppColors.error,
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: AppText.bodySmall(
+                  child: Text(
                     isTaken ? '복용완료' : '미복용',
-                    style: const TextStyle(color: Colors.white),
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: isTaken ? AppColors.white : AppColors.white,
+                    ),
                   ),
                 ),
               ],
@@ -181,57 +293,10 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
     );
   }
 
-  /// 이전 날로 이동
-  void _previousDay() {
-    setState(() {
-      _selectedDate = _selectedDate.subtract(const Duration(days: 1));
-    });
-  }
-
-  /// 다음 날로 이동
-  void _nextDay() {
-    setState(() {
-      _selectedDate = _selectedDate.add(const Duration(days: 1));
-    });
-  }
-
-  /// 날짜 선택
-  Future<void> _selectDate() async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: _selectedDate,
-      firstDate: DateTime(2020),
-      lastDate: DateTime.now(),
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: Theme.of(context).colorScheme.copyWith(
-              primary: AppColors.primary,
-            ),
-          ),
-          child: child!,
-        );
-      },
-    );
-    
-    if (picked != null) {
-      setState(() {
-        _selectedDate = picked;
-      });
-    }
-  }
-
   /// 같은 날인지 확인
   bool _isSameDay(DateTime date1, DateTime date2) {
     return date1.year == date2.year &&
            date1.month == date2.month &&
            date1.day == date2.day;
-  }
-
-  /// 날짜 문자열 반환
-  String _getDateString(DateTime date) {
-    final weekdays = ['일', '월', '화', '수', '목', '금', '토'];
-    final weekday = weekdays[date.weekday % 7];
-    return '${date.year}년 ${date.month}월 ${date.day}일 ($weekday)';
   }
 }
