@@ -112,11 +112,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         width: 140,
         height: 60,
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [AppColors.primary, AppColors.secondary],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
+          color: AppColors.secondary,
           borderRadius: BorderRadius.circular(30),
           boxShadow: [
             BoxShadow(

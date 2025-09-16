@@ -83,18 +83,13 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
   Widget _buildFilterChips() {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            _buildFilterChip('전체', 'all'),
-            const SizedBox(width: 8),
-            _buildFilterChip('미복용', 'not_taken'),
-            const SizedBox(width: 8),
-            _buildFilterChip('복용완료', 'taken'),
-          ],
-        ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          Expanded(child: _buildFilterChip('전체', 'all')),
+          Expanded(child: _buildFilterChip('미복용', 'not_taken')),
+          Expanded(child: _buildFilterChip('복용완료', 'taken')),
+        ],
       ),
     );
   }
@@ -102,30 +97,32 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
   /// 개별 필터 칩 빌드
   Widget _buildFilterChip(String label, String filterType) {
     final isSelected = _filterType == filterType;
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          _filterType = filterType;
-        });
-      },
-      child: Container(
-        height: 36,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        decoration: BoxDecoration(
-          color: isSelected ? AppColors.secondary : AppColors.secondaryLight,
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(
-            color: isSelected ? AppColors.secondary : AppColors.border,
-            width: 1,
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 4),
+      child: GestureDetector(
+        onTap: () {
+          setState(() {
+            _filterType = filterType;
+          });
+        },
+        child: Container(
+          height: 36,
+          decoration: BoxDecoration(
+            color: isSelected ? AppColors.secondary : AppColors.secondaryLight,
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(
+              color: isSelected ? AppColors.secondary : AppColors.border,
+              width: 1,
+            ),
           ),
-        ),
-        child: Center(
-          child: Text(
-            label,
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: isSelected ? AppColors.white : AppColors.secondary,
+          child: Center(
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: isSelected ? AppColors.white : AppColors.secondary,
+              ),
             ),
           ),
         ),
