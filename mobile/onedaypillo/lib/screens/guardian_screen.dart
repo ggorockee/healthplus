@@ -17,7 +17,7 @@ class GuardianScreen extends StatelessWidget {
         centerTitle: true,
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 120), // 하단 여백 증가
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 120), // 상단 마진 줄임
         child: Column(
           children: [
             // 메인 카드
@@ -57,7 +57,7 @@ class GuardianScreen extends StatelessWidget {
                         color: AppColors.primary,
                       ),
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 16),
                     Text(
                       '가족과 함께 관리하세요',
                       style: TextStyle(
@@ -68,7 +68,7 @@ class GuardianScreen extends StatelessWidget {
                       ),
                       textAlign: TextAlign.center,
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 8),
                     Text(
                       '가족이나 친구를 초대해 약 복용 현황을 공유하고, 잊지 않도록 도움을 받을 수 있어요.',
                       style: TextStyle(
@@ -80,7 +80,7 @@ class GuardianScreen extends StatelessWidget {
                       ),
                       textAlign: TextAlign.center,
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 20),
                     SizedBox(
                       width: double.infinity,
                       child: AppButton(
@@ -99,7 +99,7 @@ class GuardianScreen extends StatelessWidget {
               ),
             ),
             
-            const SizedBox(height: 24),
+            const SizedBox(height: 20),
             
             // 기능 소개 카드들
             _buildFeatureCard(
@@ -108,7 +108,7 @@ class GuardianScreen extends StatelessWidget {
               description: '가족이 약 복용을 잊었을 때 부드럽게 알려드려요',
             ),
             
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
             
             _buildFeatureCard(
               icon: Icons.visibility,
@@ -116,7 +116,7 @@ class GuardianScreen extends StatelessWidget {
               description: '가족의 약 복용 현황을 실시간으로 확인할 수 있어요',
             ),
             
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
             
             _buildFeatureCard(
               icon: Icons.chat_bubble_outline,
