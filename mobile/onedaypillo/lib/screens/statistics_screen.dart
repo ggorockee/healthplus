@@ -242,29 +242,55 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
 
   /// 개별 지표 카드
   Widget _buildMetricCard(String title, String value, IconData icon, Color color) {
-    return AppCard(
-      child: Column(
-        children: [
-          Icon(icon, color: color, size: 24),
-          const SizedBox(height: 8),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: color,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            title,
-            style: TextStyle(
-              fontSize: 12,
-              color: AppColors.textSecondary,
-            ),
-            textAlign: TextAlign.center,
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(10),
+        boxShadow: [
+          BoxShadow(
+            color: color.withValues(alpha: 0.1),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
           ),
         ],
+        border: Border.all(
+          color: color.withValues(alpha: 0.2),
+          width: 1,
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(icon, color: color, size: 24),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              value,
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: color,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              title,
+              style: TextStyle(
+                fontSize: 12,
+                color: AppColors.textSecondary,
+                fontWeight: FontWeight.w500,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -418,20 +444,43 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
 
   /// 개별 약물 통계 아이템
   Widget _buildMedicationStatItem(Map<String, dynamic> medication) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
+    final adherenceColor = medication['adherence'] >= 90 ? AppColors.success : 
+                          medication['adherence'] >= 80 ? AppColors.warning : AppColors.error;
+    
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: adherenceColor.withValues(alpha: 0.2),
+          width: 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: adherenceColor.withValues(alpha: 0.05),
+            blurRadius: 4,
+            offset: const Offset(0, 1),
+          ),
+        ],
+      ),
       child: Row(
         children: [
           Container(
             width: 50,
             height: 50,
             decoration: BoxDecoration(
-              color: AppColors.primaryLight,
+              color: adherenceColor.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(25),
+              border: Border.all(
+                color: adherenceColor.withValues(alpha: 0.3),
+                width: 1,
+              ),
             ),
             child: Icon(
               Icons.medication,
-              color: AppColors.primary,
+              color: adherenceColor,
               size: 24,
             ),
           ),
@@ -440,24 +489,51 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                AppText.titleMedium(medication['name']),
-                AppText.bodySmall('총 ${medication['totalDoses']}회 중 ${medication['missedDoses']}회 미복용'),
+                Text(
+                  medication['name'],
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  '총 ${medication['totalDoses']}회 중 ${medication['missedDoses']}회 미복용',
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
               ],
             ),
           ),
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Text(
-                '${medication['adherence']}%',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: medication['adherence'] >= 90 ? AppColors.success : 
-                         medication['adherence'] >= 80 ? AppColors.warning : AppColors.error,
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: adherenceColor.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  '${medication['adherence']}%',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: adherenceColor,
+                  ),
                 ),
               ),
-              AppText.bodySmall('복용률'),
+              const SizedBox(height: 4),
+              const Text(
+                '복용률',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: AppColors.textSecondary,
+                ),
+              ),
             ],
           ),
         ],
@@ -506,8 +582,12 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
+        color: color.withValues(alpha: 0.15), // 투명도 증가로 배경색 강화
         borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: color.withValues(alpha: 0.3), // 테두리 추가로 구분감 향상
+          width: 1,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -517,15 +597,16 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
-              color: color,
+              color: color, // 원래 색상 유지하되 배경 대비 개선
             ),
           ),
           const SizedBox(height: 4),
           Text(
             title,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w600,
+              color: AppColors.textPrimary, // 더 진한 색상으로 변경
             ),
           ),
           Text(
@@ -581,8 +662,12 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
+        color: color.withValues(alpha: 0.15), // 배경색 강화
         borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: color.withValues(alpha: 0.25), // 테두리 추가
+          width: 1,
+        ),
       ),
       child: Row(
         children: [
@@ -594,6 +679,7 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
               style: TextStyle(
                 fontSize: 14,
                 color: AppColors.textPrimary,
+                fontWeight: FontWeight.w500, // 가독성 향상을 위한 폰트 굵기 증가
               ),
             ),
           ),

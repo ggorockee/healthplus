@@ -100,8 +100,8 @@ class FirebaseConfig {
   }
 
   /// 성능 추적 시작
-  static Future<Trace> startTrace(String name) async {
-    return await performance.newTrace(name);
+  static Trace startTrace(String name) {
+    return performance.newTrace(name);
   }
 
   /// 앱 성능 이벤트 로깅
