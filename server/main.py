@@ -30,8 +30,8 @@ app = FastAPI(
     title="HealthPlus API",
     description="약물 복용 관리 애플리케이션 API",
     version="1.0.0",
-    docs_url="/api/v1/docs" if settings.DEBUG else None,
-    redoc_url="/api/v1/redoc" if settings.DEBUG else None,
+    docs_url="/v1/docs" if settings.DEBUG else None,
+    redoc_url="/v1/redoc" if settings.DEBUG else None,
     lifespan=lifespan,
 )
 
@@ -61,7 +61,7 @@ async def health_check():
 
 
 # API 라우터 등록
-app.include_router(api_router, prefix="/api/v1")
+app.include_router(api_router, prefix="/v1")
 
 
 if __name__ == "__main__":
