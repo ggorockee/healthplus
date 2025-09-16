@@ -309,14 +309,38 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
             height: 200,
             child: LineChart(
               LineChartData(
-                gridData: FlGridData(show: false),
+                gridData: FlGridData(
+                  show: true,
+                  horizontalInterval: 20,
+                  verticalInterval: 1,
+                  getDrawingHorizontalLine: (value) {
+                    return FlLine(
+                      color: AppColors.borderLight,
+                      strokeWidth: 1,
+                    );
+                  },
+                  getDrawingVerticalLine: (value) {
+                    return FlLine(
+                      color: AppColors.borderLight,
+                      strokeWidth: 1,
+                    );
+                  },
+                ),
                 titlesData: FlTitlesData(
                   leftTitles: AxisTitles(
                     sideTitles: SideTitles(
                       showTitles: true,
                       reservedSize: 40,
                       getTitlesWidget: (value, meta) {
-                        return Text('${value.toInt()}%', style: const TextStyle(fontSize: 10));
+                        return Text(
+                          '${value.toInt()}%', 
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textPrimary, // 더 진한 색상으로 변경
+                            fontFamily: AppTypography.fontFamily,
+                          ),
+                        );
                       },
                     ),
                   ),
@@ -326,7 +350,15 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
                       getTitlesWidget: (value, meta) {
                         final index = value.toInt();
                         if (index >= 0 && index < data.length) {
-                          return Text(data[index]['day'] ?? data[index]['week'], style: const TextStyle(fontSize: 10));
+                          return Text(
+                            data[index]['day'] ?? data[index]['week'], 
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.textPrimary, // 더 진한 색상으로 변경
+                              fontFamily: AppTypography.fontFamily,
+                            ),
+                          );
                         }
                         return const Text('');
                       },
@@ -335,7 +367,39 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
                   topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
                   rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
                 ),
-                borderData: FlBorderData(show: false),
+                borderData: FlBorderData(
+                  show: true,
+                  border: Border.all(
+                    color: AppColors.borderLight,
+                    width: 1,
+                  ),
+                ),
+                lineTouchData: LineTouchData(
+                  enabled: true,
+                  touchTooltipData: LineTouchTooltipData(
+                    getTooltipItems: (List<LineBarSpot> touchedBarSpots) {
+                      return touchedBarSpots.map((barSpot) {
+                        final index = barSpot.x.toInt();
+                        if (index >= 0 && index < data.length) {
+                          final day = data[index]['day'] ?? data[index]['week'];
+                          final adherence = barSpot.y;
+                          return LineTooltipItem(
+                            '$day\n${adherence.toStringAsFixed(1)}%',
+                            TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.white, // 흰색 텍스트로 변경
+                              fontFamily: AppTypography.fontFamily,
+                              height: 1.3,
+                            ),
+                          );
+                        }
+                        return null;
+                      }).toList();
+                    },
+                  ),
+                  handleBuiltInTouches: true,
+                ),
                 lineBarsData: [
                   LineChartBarData(
                     spots: data.asMap().entries.map((entry) {
@@ -347,7 +411,17 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
                     isCurved: true,
                     color: AppColors.primary,
                     barWidth: 3,
-                    dotData: FlDotData(show: true),
+                    dotData: FlDotData(
+                      show: true,
+                      getDotPainter: (spot, percent, barData, index) {
+                        return FlDotCirclePainter(
+                          radius: 4,
+                          color: AppColors.primary,
+                          strokeWidth: 2,
+                          strokeColor: AppColors.white,
+                        );
+                      },
+                    ),
                     belowBarData: BarAreaData(
                       show: true,
                       color: AppColors.primary.withValues(alpha: 0.1),
@@ -384,7 +458,15 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
                       showTitles: true,
                       reservedSize: 40,
                       getTitlesWidget: (value, meta) {
-                        return Text('${value.toInt()}%', style: const TextStyle(fontSize: 10));
+                        return Text(
+                          '${value.toInt()}%', 
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textPrimary, // 더 진한 색상으로 변경
+                            fontFamily: AppTypography.fontFamily,
+                          ),
+                        );
                       },
                     ),
                   ),
@@ -394,7 +476,15 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
                       getTitlesWidget: (value, meta) {
                         final index = value.toInt();
                         if (index >= 0 && index < data.length) {
-                          return Text(data[index]['day'] ?? data[index]['week'], style: const TextStyle(fontSize: 10));
+                          return Text(
+                            data[index]['day'] ?? data[index]['week'], 
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.textPrimary, // 더 진한 색상으로 변경
+                              fontFamily: AppTypography.fontFamily,
+                            ),
+                          );
                         }
                         return const Text('');
                       },
@@ -403,19 +493,59 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
                   topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
                   rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
                 ),
-                borderData: FlBorderData(show: false),
+                borderData: FlBorderData(
+                  show: true,
+                  border: Border.all(
+                    color: AppColors.borderLight,
+                    width: 1,
+                  ),
+                ),
+                barTouchData: BarTouchData(
+                  enabled: true,
+                  touchTooltipData: BarTouchTooltipData(
+                    getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                      final index = group.x.toInt();
+                      if (index >= 0 && index < data.length) {
+                        final day = data[index]['day'] ?? data[index]['week'];
+                        final adherence = rod.toY;
+                        final status = adherence >= 80 ? '우수' : adherence >= 60 ? '보통' : '주의';
+                        
+                        return BarTooltipItem(
+                          '$day\n${adherence.toStringAsFixed(1)}% ($status)',
+                          TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.white, // 흰색 텍스트로 변경
+                            fontFamily: AppTypography.fontFamily,
+                            height: 1.3,
+                          ),
+                        );
+                      }
+                      return null;
+                    },
+                  ),
+                  handleBuiltInTouches: true,
+                ),
                 barGroups: data.asMap().entries.map((entry) {
                   final adherence = _selectedPeriod == 'week' 
                       ? (entry.value['taken'] / entry.value['total'] * 100)
                       : entry.value['adherence'];
+                  final barColor = adherence >= 80 ? AppColors.success : 
+                                 adherence >= 60 ? AppColors.warning : AppColors.error;
+                  
                   return BarChartGroupData(
                     x: entry.key,
                     barRods: [
                       BarChartRodData(
                         toY: adherence,
-                        color: adherence >= 80 ? AppColors.success : adherence >= 60 ? AppColors.warning : AppColors.error,
+                        color: barColor,
                         width: 20,
                         borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
+                        backDrawRodData: BackgroundBarChartRodData(
+                          show: true,
+                          toY: 100,
+                          color: AppColors.surfaceAlt,
+                        ),
                       ),
                     ],
                   );
