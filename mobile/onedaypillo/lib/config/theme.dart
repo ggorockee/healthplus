@@ -117,7 +117,7 @@ ThemeData buildLightTheme() {
       seedColor: AppColors.primary,
       primary: AppColors.primary,
       onPrimary: AppColors.textOnPrimary,
-      secondary: AppColors.accentYellow,
+      secondary: AppColors.accent,
       onSecondary: AppColors.textPrimary,
       surface: AppColors.surface,
       onSurface: AppColors.textPrimary,
