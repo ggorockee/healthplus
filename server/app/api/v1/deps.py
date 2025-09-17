@@ -5,15 +5,24 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.ext.asyncio import AsyncSession
 
+# Repositories
 from app.application.repositories.user_repository import IUserRepository
+from app.application.repositories.medication_repository import IMedicationRepository
+from app.infrastructure.repositories.user_repository import SQLAlchemyUserRepository
+from app.infrastructure.repositories.medication_repository import SQLAlchemyMedicationRepository
+
+# Services
 from app.application.services.auth_service import AuthService
+from app.application.services.medication_service import MedicationService
+
+# Models and DB Session
 from app.infrastructure.database.models.user import User
 from app.infrastructure.database.session import get_db
-from app.infrastructure.repositories.user_repository import SQLAlchemyUserRepository
 
 
 security = HTTPBearer()
 
+# --- User and Auth Dependencies ---
 
 def get_user_repository(db: AsyncSession = Depends(get_db)) -> IUserRepository:
     """사용자 리포지토리 의존성 주입"""
@@ -49,3 +58,15 @@ async def get_current_user(
 def get_current_user_id(current_user: User = Depends(get_current_user)) -> uuid.UUID:
     """현재 로그인된 사용자의 ID(UUID)를 반환하는 의존성"""
     return current_user.id
+
+
+# --- Medication Dependencies ---
+
+def get_medication_repository(db: AsyncSession = Depends(get_db)) -> IMedicationRepository:
+    """약물 리포지토리 의존성 주입"""
+    return SQLAlchemyMedicationRepository(db)
+
+
+def get_medication_service(med_repo: IMedicationRepository = Depends(get_medication_repository)) -> MedicationService:
+    """약물 서비스 의존성 주입"""
+    return MedicationService(med_repo)
