@@ -12,7 +12,7 @@ def update_yaml_file(repo_url, token, image_tag, branches_to_try=None):
     and pushes the changes back to the repository.
     """
     if branches_to_try is None:
-        branches_to_try = ["develop", "dev", "main"]
+        branches_to_try = ["develop", "dev"]
 
     temp_dir = tempfile.mkdtemp()
     try:
