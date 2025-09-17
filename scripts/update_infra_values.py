@@ -3,7 +3,7 @@ import os
 import sys
 import tempfile
 import shutil
-from git import Repo
+from git import Repo, exc
 from ruamel.yaml import YAML
 
 def update_yaml_file(repo_url, token, image_tag, branches_to_try=None):
@@ -35,11 +35,10 @@ def update_yaml_file(repo_url, token, image_tag, branches_to_try=None):
                 cloned_branch = branch
                 print(f"Successfully cloned branch: {cloned_branch}")
                 break  # Exit loop on success
-            except Exception as e:
-                if "branch not found" in str(e).lower() or "couldn't find remote ref" in str(e).lower():
+            except exc.GitCommandError as e:
+                if "branch not found" in e.stderr.lower() or "couldn't find remote ref" in e.stderr.lower() or "not found in upstream" in e.stderr.lower():
                     print(f"Branch '{branch}' not found. Trying next...")
                 else:
-                    # For other errors (like auth), raise immediately
                     raise e
         
         if repo is None:
