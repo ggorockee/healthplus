@@ -9,10 +9,13 @@ on:
       - '.github/workflows/ci-server.yml'
 
 jobs:
-  build-and-push-docker-image:
+  build-production-server:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+
+    env:
+      BUILD_MODE: production
 
     steps:
       - name: Checkout repository
@@ -36,6 +39,6 @@ jobs:
         with:
           context: ./server
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/healthplus-production-server:sha-${{ steps.vars.outputs.sha }}
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/healthplus-${{ env.BUILD_MODE }}-server:sha-${{ steps.vars.outputs.sha }}
           build-args: |
-            BUILD_MODE=production
+            BUILD_MODE=${{ env.BUILD_MODE }}
