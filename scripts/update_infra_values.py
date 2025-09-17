@@ -6,20 +6,45 @@ import shutil
 from git import Repo
 from ruamel.yaml import YAML
 
-def update_yaml_file(repo_url, token, image_tag, branch="develop"):
+def update_yaml_file(repo_url, token, image_tag, branches_to_try=None):
     """
-    Clones a git repository, updates a YAML file with a new image tag,
+    Clones a git repository from a list of possible branches, updates a YAML file,
     and pushes the changes back to the repository.
     """
+    if branches_to_try is None:
+        branches_to_try = ["develop", "dev", "main"]
+
     temp_dir = tempfile.mkdtemp()
     try:
-        # Add token to repo_url for authentication
         authenticated_repo_url = repo_url.replace("https://", f"https://oauth2:{token}@")
+        
+        repo = None
+        cloned_branch = None
+        for branch in branches_to_try:
+            try:
+                print(f"Attempting to clone branch: {branch}...")
+                # Clean up temp_dir before a new clone attempt to avoid conflicts
+                for item in os.listdir(temp_dir):
+                    item_path = os.path.join(temp_dir, item)
+                    if os.path.isdir(item_path):
+                        shutil.rmtree(item_path)
+                    else:
+                        os.remove(item_path)
 
-        # Clone the repository
-        print(f"Cloning repository {repo_url}...")
-        repo = Repo.clone_from(authenticated_repo_url, temp_dir, branch=branch)
-        print("Repository cloned successfully.")
+                repo = Repo.clone_from(authenticated_repo_url, temp_dir, branch=branch)
+                cloned_branch = branch
+                print(f"Successfully cloned branch: {cloned_branch}")
+                break  # Exit loop on success
+            except Exception as e:
+                if "could not find remote branch" in str(e).lower():
+                    print(f"Branch '{branch}' not found. Trying next...")
+                else:
+                    # For other errors (like auth), raise immediately
+                    raise e
+        
+        if repo is None:
+            print(f"Error: Could not find any of the specified branches: {branches_to_try}")
+            sys.exit(1)
 
         # Configure git user
         repo.config_writer().set_value("user", "name", "Gemini CI").release()
@@ -61,6 +86,7 @@ def update_yaml_file(repo_url, token, image_tag, branch="develop"):
 
     except Exception as e:
         print(f"An error occurred: {e}")
+        sys.exit(1) # Exit with a non-zero status code to indicate failure
     finally:
         # Clean up the temporary directory
         print(f"Cleaning up temporary directory: {temp_dir}")
@@ -76,4 +102,4 @@ if __name__ == "__main__":
     
     infra_repo_url = "https://github.com/ggorockee/infra.git"
 
-    update_yaml_file(infra_repo_url, infra_token_arg, image_tag_arg, branch="develop")
+    update_yaml_file(infra_repo_url, infra_token_arg, image_tag_arg)
