@@ -6,7 +6,7 @@ import shutil
 from git import Repo
 from ruamel.yaml import YAML
 
-def update_yaml_file(repo_url, token, image_tag, branch="main"):
+def update_yaml_file(repo_url, token, image_tag, branch="develop"):
     """
     Clones a git repository, updates a YAML file with a new image tag,
     and pushes the changes back to the repository.
@@ -76,4 +76,4 @@ if __name__ == "__main__":
     
     infra_repo_url = "https://github.com/ggorockee/infra.git"
 
-    update_yaml_file(infra_repo_url, infra_token_arg, image_tag_arg)
+    update_yaml_file(infra_repo_url, infra_token_arg, image_tag_arg, branch="develop")
