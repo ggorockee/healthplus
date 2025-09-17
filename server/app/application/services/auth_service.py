@@ -1,20 +1,22 @@
-import asyncio
+import uuid
 from datetime import datetime, timedelta
 from typing import Optional
+
 from jose import JWTError, jwt
 from passlib.context import CryptContext
-from supabase import Client
 
 from app.core.config import settings
-from app.core.database import get_supabase, get_service_supabase
 from app.core.exceptions import AuthenticationError, ValidationError
-from app.schemas.auth import LoginRequest, SignUpRequest, UserResponse, TokenResponse
+from app.application.repositories.user_repository import IUserRepository
+from app.application.schemas.auth import LoginRequest, SignUpRequest, UserResponse, TokenResponse, AuthResponse
+from app.infrastructure.database.models.user import User
 
 
 class AuthService:
-    """인증 서비스"""
+    """인증 서비스 (비즈니스 로직)"""
 
-    def __init__(self):
+    def __init__(self, user_repo: IUserRepository):
+        self.user_repo = user_repo
         self.pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
     def verify_password(self, plain_password: str, hashed_password: str) -> bool:
@@ -28,12 +30,12 @@ class AuthService:
     def create_access_token(self, data: dict) -> str:
         """액세스 토큰 생성"""
         to_encode = data.copy()
-        expire = datetime.utcnow() + timedelta(hours=settings.JWT_EXPIRY_HOURS)
+        expire = datetime.utcnow() + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
         to_encode.update({"exp": expire})
 
         encoded_jwt = jwt.encode(
             to_encode,
-            settings.JWT_SECRET,
+            settings.JWT_SECRET_KEY,
             algorithm=settings.JWT_ALGORITHM
         )
         return encoded_jwt
@@ -43,176 +45,70 @@ class AuthService:
         try:
             payload = jwt.decode(
                 token,
-                settings.JWT_SECRET,
+                settings.JWT_SECRET_KEY,
                 algorithms=[settings.JWT_ALGORITHM]
             )
             return payload
         except JWTError:
             return None
 
-    async def sign_up_with_email(self, signup_data: SignUpRequest) -> dict:
-        """이메일 회원가입"""
-        try:
-            client = get_supabase()
+    async def sign_up_with_email(self, signup_data: SignUpRequest) -> AuthResponse:
+        """이메일 회원가입 로직"""
+        existing_user = await self.user_repo.get_user_by_email(signup_data.email)
+        if existing_user:
+            raise ValidationError("이미 등록된 이메일입니다")
 
-            # Supabase 회원가입
-            response = await asyncio.get_event_loop().run_in_executor(
-                None,
-                lambda: client.auth.sign_up({
-                    "email": signup_data.email,
-                    "password": signup_data.password,
-                    "options": {
-                        "data": {
-                            "name": signup_data.name,
-                            "login_method": "email"
-                        }
-                    }
-                })
+        hashed_password = self.get_password_hash(signup_data.password)
+        
+        db_user = await self.user_repo.create_user(
+            email=signup_data.email,
+            hashed_password=hashed_password,
+            name=signup_data.name
+        )
+
+        access_token = self.create_access_token(data={"sub": str(db_user.id)})
+        
+        return AuthResponse(
+            user=UserResponse.model_validate(db_user),
+            token=TokenResponse(
+                access_token=access_token,
+                expires_in=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60
             )
+        )
 
-            if response.user:
-                # 사용자 프로필 테이블에 추가 정보 저장
-                await self._create_user_profile(
-                    user_id=response.user.id,
-                    email=response.user.email,
-                    name=signup_data.name,
-                    login_method="email"
-                )
+    async def sign_in_with_email(self, login_data: LoginRequest) -> AuthResponse:
+        """이메일 로그인 로직"""
+        db_user = await self.user_repo.get_user_by_email(login_data.email)
+        if not db_user or not self.verify_password(login_data.password, db_user.hashed_password):
+            raise AuthenticationError("이메일 또는 비밀번호가 올바르지 않습니다")
 
-                return {
-                    "user": UserResponse(
-                        id=response.user.id,
-                        email=response.user.email,
-                        name=signup_data.name,
-                        login_method="email",
-                        created_at=datetime.utcnow(),
-                        is_email_verified=response.user.email_confirmed_at is not None
-                    ),
-                    "token": TokenResponse(
-                        access_token=self.create_access_token({"sub": response.user.id}),
-                        expires_in=settings.JWT_EXPIRY_HOURS * 3600
-                    )
-                }
-            else:
-                raise AuthenticationError("회원가입에 실패했습니다")
+        access_token = self.create_access_token(data={"sub": str(db_user.id)})
 
-        except Exception as e:
-            if "already been registered" in str(e):
-                raise ValidationError("이미 등록된 이메일입니다")
-            raise AuthenticationError(f"회원가입 실패: {str(e)}")
-
-    async def sign_in_with_email(self, login_data: LoginRequest) -> dict:
-        """이메일 로그인"""
-        try:
-            client = get_supabase()
-
-            response = await asyncio.get_event_loop().run_in_executor(
-                None,
-                lambda: client.auth.sign_in_with_password({
-                    "email": login_data.email,
-                    "password": login_data.password
-                })
+        return AuthResponse(
+            user=UserResponse.model_validate(db_user),
+            token=TokenResponse(
+                access_token=access_token,
+                expires_in=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60
             )
+        )
 
-            if response.user:
-                # 사용자 프로필 정보 가져오기
-                profile = await self._get_user_profile(response.user.id)
-
-                return {
-                    "user": UserResponse(
-                        id=response.user.id,
-                        email=response.user.email,
-                        name=profile.get("name"),
-                        profile_image_url=profile.get("profile_image_url"),
-                        login_method=profile.get("login_method", "email"),
-                        created_at=datetime.fromisoformat(
-                            response.user.created_at.replace("Z", "+00:00")
-                        ),
-                        is_email_verified=response.user.email_confirmed_at is not None
-                    ),
-                    "token": TokenResponse(
-                        access_token=self.create_access_token({"sub": response.user.id}),
-                        expires_in=settings.JWT_EXPIRY_HOURS * 3600
-                    )
-                }
-            else:
-                raise AuthenticationError("로그인에 실패했습니다")
-
-        except Exception as e:
-            if "Invalid login credentials" in str(e):
-                raise AuthenticationError("이메일 또는 비밀번호가 올바르지 않습니다")
-            raise AuthenticationError(f"로그인 실패: {str(e)}")
-
-    async def get_current_user(self, token: str) -> UserResponse:
-        """현재 사용자 정보 가져오기"""
+    async def get_current_user(self, token: str) -> User:
+        """토큰으로 현재 사용자 정보 가져오기"""
         payload = self.verify_token(token)
         if not payload:
             raise AuthenticationError("유효하지 않은 토큰입니다")
 
-        user_id = payload.get("sub")
-        if not user_id:
+        user_id_str = payload.get("sub")
+        if not user_id_str:
             raise AuthenticationError("토큰에서 사용자 ID를 찾을 수 없습니다")
-
-        client = get_supabase()
-
-        # Supabase에서 사용자 정보 가져오기
+        
         try:
-            response = await asyncio.get_event_loop().run_in_executor(
-                None,
-                lambda: client.auth.get_user()
-            )
+            user_id = uuid.UUID(user_id_str)
+        except ValueError:
+            raise AuthenticationError("유효하지 않은 사용자 ID 형식입니다")
 
-            if response.user:
-                profile = await self._get_user_profile(user_id)
-
-                return UserResponse(
-                    id=response.user.id,
-                    email=response.user.email,
-                    name=profile.get("name"),
-                    profile_image_url=profile.get("profile_image_url"),
-                    login_method=profile.get("login_method", "email"),
-                    created_at=datetime.fromisoformat(
-                        response.user.created_at.replace("Z", "+00:00")
-                    ),
-                    is_email_verified=response.user.email_confirmed_at is not None
-                )
-            else:
-                raise AuthenticationError("사용자를 찾을 수 없습니다")
-
-        except Exception as e:
-            raise AuthenticationError(f"사용자 정보 조회 실패: {str(e)}")
-
-    async def _create_user_profile(
-        self,
-        user_id: str,
-        email: str,
-        name: Optional[str],
-        login_method: str
-    ):
-        """사용자 프로필 생성"""
-        client = get_service_supabase()
-
-        await asyncio.get_event_loop().run_in_executor(
-            None,
-            lambda: client.table("user_profiles").insert({
-                "user_id": user_id,
-                "email": email,
-                "name": name,
-                "login_method": login_method,
-                "created_at": datetime.utcnow().isoformat()
-            }).execute()
-        )
-
-    async def _get_user_profile(self, user_id: str) -> dict:
-        """사용자 프로필 가져오기"""
-        client = get_service_supabase()
-
-        response = await asyncio.get_event_loop().run_in_executor(
-            None,
-            lambda: client.table("user_profiles").select("*").eq("user_id", user_id).single().execute()
-        )
-
-        return response.data if response.data else {}
-
-
-auth_service = AuthService()
+        db_user = await self.user_repo.get_user_by_id(user_id)
+        if not db_user:
+            raise AuthenticationError("사용자를 찾을 수 없습니다")
+        
+        return db_user

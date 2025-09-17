@@ -7,14 +7,12 @@ from pydantic_settings import BaseSettings
 class Settings(BaseSettings):
     """애플리케이션 설정"""
 
-    # Supabase 설정
-    SUPABASE_URL: str = Field(..., env="SUPABASE_URL")
-    SUPABASE_ANON_KEY: str = Field(..., env="SUPABASE_ANON_KEY")
-    SUPABASE_SERVICE_ROLE_KEY: str = Field(..., env="SUPABASE_SERVICE_ROLE_KEY")
+    # 데이터베이스 설정 (SQLAlchemy)
+    DATABASE_URL: str = Field(..., env="DATABASE_URL")
 
     # JWT 설정
-    JWT_SECRET: str = Field(..., env="JWT_SECRET")
-    JWT_EXPIRY_HOURS: int = Field(24, env="JWT_EXPIRY_HOURS")
+    JWT_SECRET_KEY: str = Field(..., env="JWT_SECRET_KEY")
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = Field(60 * 24, env="ACCESS_TOKEN_EXPIRE_MINUTES") # 1 day
     JWT_ALGORITHM: str = "HS256"
 
     # 앱 설정
@@ -38,22 +36,8 @@ class Settings(BaseSettings):
 
     class Config:
         case_sensitive = True
+        env_file = ".env"
+        env_file_encoding = "utf-8"
 
-        @property
-        def env_file(self):
-            """환경에 따라 다른 .env 파일 로드"""
-            environment = os.getenv("ENVIRONMENT", "development")
-            env_file = f".env.{environment}"
-
-            # 환경별 파일이 없으면 기본 .env 파일 사용
-            if not os.path.exists(env_file):
-                return ".env"
-            return env_file
-
-
-def get_settings() -> Settings:
-    """환경별 설정 반환"""
-    return Settings()
-
-
-settings = get_settings()
+        
+settings = Settings()
