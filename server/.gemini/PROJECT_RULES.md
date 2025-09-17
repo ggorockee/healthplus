@@ -31,6 +31,10 @@
 | **Configuration** | Pydantic-Settings | 최신 | 환경 변수 기반 설정 관리 |
 | **Linter/Formatter** | Ruff, Black | 최신 | 코드 품질 및 스타일 유지 |
 
+### 2.1. 의존성 관리
+- **규칙**: 새로운 라이브러리나 패키지를 추가할 경우, 반드시 `requirements.txt` 파일에 해당 의존성을 명시해야 합니다.
+- **방법**: `pip install <package-name>`으로 설치 후, `pip freeze > requirements.txt` 명령어를 사용하여 파일을 업데이트합니다. 이를 통해 모든 개발 환경에서 동일한 의존성을 유지합니다.
+
 ---
 
 ## 3. 아키텍처 설계
