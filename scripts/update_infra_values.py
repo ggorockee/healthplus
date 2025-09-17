@@ -46,8 +46,8 @@ def update_yaml_file(repo_url, token, image_tag, branches_to_try=None):
             sys.exit(1)
 
         # Configure git user
-        repo.config_writer().set_value("user", "name", "Gemini CI").release()
-        repo.config_writer().set_value("user", "email", "gemini-ci@example.com").release()
+        repo.config_writer().set_value("user", "name", "Github Bot").release()
+        repo.config_writer().set_value("user", "email", "github-bot@example.com").release()
 
         # Path to the YAML file
         yaml_file_path = os.path.join(temp_dir, "charts/argocd/applicationsets/valuefiles/dev/onedaypillo/values.yaml")
