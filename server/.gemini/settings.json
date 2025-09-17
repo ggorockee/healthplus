@@ -1,0 +1,21 @@
+{
+    "mcpServers": {
+    //   "TalkToFigma": {
+    //     "command": "bunx",
+    //     "args": [
+    //       "cursor-talk-to-figma-mcp@latest"
+    //     ]
+    //   },
+      "supabase": {
+        "command": "npx",
+        "args": [
+          "-y",
+          "@supabase/mcp-server-supabase@latest",
+          "--project-ref=yjkfjytsfnpkahuiajjv"
+        ],
+        "env": {
+          "SUPABASE_ACCESS_TOKEN": "sbp_951115371dbad98ecc27b96c1d728815cce35b7e"
+        }
+      }
+    }
+  }
