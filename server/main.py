@@ -8,9 +8,23 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from app.core.config import settings
-from app.core.database import init_db
 from app.api.v1.router import api_router
 from app.core.exceptions import APIException
+
+# --- DB 초기화 관련 임포트 ---
+from app.infrastructure.database.session import async_engine, Base
+# 모든 모델을 Base에 등록하기 위해 임포트합니다.
+from app.infrastructure.database.models import user, medications
+# --------------------------
+
+
+async def init_db():
+    """애플리케이션 시작 시 데이터베이스 테이블을 생성합니다."""
+    async with async_engine.begin() as conn:
+        # 기존 테이블을 삭제하고 다시 생성하려면 아래 주석을 해제하세요.
+        # await conn.run_sync(Base.metadata.drop_all)
+        await conn.run_sync(Base.metadata.create_all)
+    print("✅ 데이터베이스 테이블 초기화 완료")
 
 
 @asynccontextmanager
