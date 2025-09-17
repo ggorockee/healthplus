@@ -36,7 +36,7 @@ def update_yaml_file(repo_url, token, image_tag, branches_to_try=None):
                 print(f"Successfully cloned branch: {cloned_branch}")
                 break  # Exit loop on success
             except Exception as e:
-                if "could not find remote branch" in str(e).lower():
+                if "branch not found" in str(e).lower() or "couldn't find remote ref" in str(e).lower():
                     print(f"Branch '{branch}' not found. Trying next...")
                 else:
                     # For other errors (like auth), raise immediately
