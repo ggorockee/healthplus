@@ -46,6 +46,10 @@ dependencies:
   
   # 로컬 저장소
   shared_preferences: ^2.3.2
+  flutter_secure_storage: ^9.2.2
+  
+  # HTTP 클라이언트
+  dio: ^5.7.0
   
   # 인증 관련
   firebase_core: ^3.6.0
