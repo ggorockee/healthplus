@@ -21,8 +21,6 @@ from app.infrastructure.database.models import user, medications
 async def init_db():
     """애플리케이션 시작 시 데이터베이스 테이블을 생성합니다."""
     async with async_engine.begin() as conn:
-        # 기존 테이블을 삭제하고 다시 생성하려면 아래 주석을 해제하세요.
-        # await conn.run_sync(Base.metadata.drop_all)
         await conn.run_sync(Base.metadata.create_all)
     print("✅ 데이터베이스 테이블 초기화 완료")
 
@@ -30,45 +28,44 @@ async def init_db():
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     """앱 시작/종료 시 실행되는 코드"""
-    # 애플리케이션 시작 시
-    await init_db()
     print("🚀 HealthPlus API 서버가 시작되었습니다")
-
+    await init_db()
     yield
-
-    # 애플리케이션 종료 시
     print("⛔ HealthPlus API 서버가 종료됩니다")
 
+# --------------------------------------------------------------------------
+# 1. v1 API를 위한 Sub-Application 생성
+# --------------------------------------------------------------------------
+v1_app = FastAPI(
+    title="HealthPlus API v1",
+    description="약물 복용 관리 애플리케이션 API - v1",
+    version="1.0.0",
+    docs_url="/docs" if settings.DEBUG else None,      # 경로는 /v1/docs가 됨
+    redoc_url="/redoc" if settings.DEBUG else None,    # 경로는 /v1/redoc이 됨
+)
 
-import logging
+# v1 라우터를 접두사 없이 포함
+v1_app.include_router(api_router)
 
-# ===================================================================
-# [DEBUG] 설정 값 확인을 위한 로깅
-# ===================================================================
-logger = logging.getLogger("uvicorn.error")
-logger.info("===================================================================")
-logger.info(f"[DEBUG] settings.ROOT_PATH: '{settings.ROOT_PATH}' (Type: {type(settings.ROOT_PATH)})")
-logger.info(f"[DEBUG] settings.DEBUG: {settings.DEBUG} (Type: {type(settings.DEBUG)})")
+# v1 앱에 대한 예외 처리기
+@v1_app.exception_handler(APIException)
+async def api_exception_handler(request: Request, exc: APIException):
+    """API 예외 처리"""
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"detail": exc.detail, "error_code": exc.error_code}
+    )
 
-docs_url = "/v1/docs" if settings.DEBUG else None
-redoc_url = "/v1/redoc" if settings.DEBUG else None
-
-logger.info(f"[DEBUG] Calculated docs_url: {docs_url}")
-logger.info(f"[DEBUG] Calculated redoc_url: {redoc_url}")
-logger.info("===================================================================")
-# ===================================================================
-
+# --------------------------------------------------------------------------
+# 2. 전체를 감싸는 최상위(Root) Application 생성
+# --------------------------------------------------------------------------
 app = FastAPI(
     title="HealthPlus API",
-    description="약물 복용 관리 애플리케이션 API",
-    version="1.0.0",
-    docs_url=docs_url,
-    redoc_url=redoc_url,
     lifespan=lifespan,
     root_path=settings.ROOT_PATH,
 )
 
-# CORS 미들웨어 설정
+# 최상위 앱에 CORS 미들웨어 설정
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  # 프로덕션에서는 특정 도메인만 허용
@@ -77,25 +74,17 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
-@app.exception_handler(APIException)
-async def api_exception_handler(request: Request, exc: APIException):
-    """API 예외 처리"""
-    return JSONResponse(
-        status_code=exc.status_code,
-        content={"detail": exc.detail, "error_code": exc.error_code}
-    )
-
-
+# 최상위 앱에 공용 헬스 체크 엔드포인트 추가
 @app.get("/health")
 async def health_check():
     """헬스 체크 엔드포인트"""
     return {"status": "healthy", "message": "HealthPlus API is running"}
 
 
-# API 라우터 등록
-app.include_router(api_router, prefix="/v1")
+# 최상위 앱에 v1 Sub-Application을 /v1 경로로 마운트
+app.mount("/v1", v1_app)
 
+# --------------------------------------------------------------------------
 
 if __name__ == "__main__":
     uvicorn.run(
