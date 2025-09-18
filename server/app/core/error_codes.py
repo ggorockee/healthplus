@@ -45,6 +45,7 @@ class ErrorCode(str, Enum):
     REMINDER_INVALID_TIME = "REMINDER_INVALID_TIME"
     REMINDER_DUPLICATE = "REMINDER_DUPLICATE"
     REMINDER_NOTIFICATION_FAILED = "REMINDER_NOTIFICATION_FAILED"
+    SYS_NOTIFICATION_NOT_FOUND = "SYS_NOTIFICATION_NOT_FOUND"
     
     # 시스템 관련 (SYS_*)
     SYS_DATABASE_ERROR = "SYS_DATABASE_ERROR"
@@ -106,6 +107,7 @@ class ErrorMessage:
         ErrorCode.REMINDER_INVALID_TIME: "잘못된 알림 시간입니다.",
         ErrorCode.REMINDER_DUPLICATE: "중복된 알림 설정입니다.",
         ErrorCode.REMINDER_NOTIFICATION_FAILED: "알림 전송에 실패했습니다.",
+        ErrorCode.SYS_NOTIFICATION_NOT_FOUND: "알림을 찾을 수 없습니다.",
         
         # 시스템 관련
         ErrorCode.SYS_DATABASE_ERROR: "데이터베이스 오류가 발생했습니다.",

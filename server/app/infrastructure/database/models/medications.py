@@ -46,6 +46,8 @@ class Medication(Base):
     user = relationship("User", back_populates="medications")
     # MedicationRecord 모델과의 관계 설정
     records = relationship("MedicationRecord", back_populates="medication", cascade="all, delete-orphan")
+    # Reminder 모델과의 관계 설정
+    reminders = relationship("Reminder", back_populates="medication", cascade="all, delete-orphan")
 
 
 class MedicationRecord(Base):
