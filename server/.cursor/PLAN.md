@@ -66,18 +66,18 @@
 ### Phase 3: 약물 관리 API 완성 (우선순위: 높음)
 
 #### 3.1 약물 관리 API 개선
-- [ ] 약물 목록 조회 API 개선 (`/v1/medicine`)
-- [ ] 약물 추가 API 개선 (`/v1/medicine` POST)
-- [ ] 특정 약물 조회 API (`/v1/medicine/{id}`)
-- [ ] 약물 수정 API (`/v1/medicine/{id}` PUT)
-- [ ] 약물 삭제 API (`/v1/medicine/{id}` DELETE)
-- [ ] 오늘의 약물 목록 API (`/v1/medicine/today`)
+- [x] 약물 목록 조회 API 개선 (`/v1/medicine`)
+- [x] 약물 추가 API 개선 (`/v1/medicine` POST)
+- [x] 특정 약물 조회 API (`/v1/medicine/{id}`)
+- [x] 약물 수정 API (`/v1/medicine/{id}` PUT)
+- [x] 약물 삭제 API (`/v1/medicine/{id}` DELETE)
+- [x] 오늘의 약물 목록 API (`/v1/medicine/today`)
 
 #### 3.2 복용 로그 API 완성
-- [ ] 복용 로그 기록 API (`/v1/medication-log` POST)
-- [ ] 복용 로그 조회 API (`/v1/medication-log` GET)
-- [ ] 복용 로그 수정 API (`/v1/medication-log/{id}` PUT)
-- [ ] 복용 로그 삭제 API (`/v1/medication-log/{id}` DELETE)
+- [x] 복용 로그 기록 API (`/v1/medication-log` POST)
+- [x] 복용 로그 조회 API (`/v1/medication-log` GET)
+- [x] 복용 로그 수정 API (`/v1/medication-log/{id}` PUT)
+- [x] 복용 로그 삭제 API (`/v1/medication-log/{id}` DELETE)
 
 ### Phase 4: 통계 및 분석 API (우선순위: 중간)
 
@@ -149,11 +149,11 @@
 
 ## 📊 진행 상황 추적
 
-### 전체 진행률: 12.5% (1/8 Phase 완료)
+### 전체 진행률: 37.5% (3/8 Phase 완료)
 
 - [x] Phase 1: 환경 설정 및 기본 구조 완성
-- [ ] Phase 2: 인증 시스템 완성
-- [ ] Phase 3: 약물 관리 API 완성
+- [x] Phase 2: 인증 시스템 완성
+- [x] Phase 3: 약물 관리 API 완성
 - [ ] Phase 4: 통계 및 분석 API
 - [ ] Phase 5: 알림 시스템
 - [ ] Phase 6: 시스템 API
