@@ -47,6 +47,7 @@ app = FastAPI(
     docs_url="/v1/docs" if settings.DEBUG else None,
     redoc_url="/v1/redoc" if settings.DEBUG else None,
     lifespan=lifespan,
+    root_path=settings.ROOT_PATH,
 )
 
 # CORS 미들웨어 설정

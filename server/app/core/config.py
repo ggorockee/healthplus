@@ -36,5 +36,8 @@ class Settings(BaseSettings):
     # Redis 설정
     REDIS_URL: Optional[str] = Field(None, env="REDIS_URL")
 
+    # 배포 환경의 Root Path 설정
+    ROOT_PATH: str = Field("", description="FastAPI root path for sub-path deployments", env="ROOT_PATH")
+
 
 settings = Settings()
