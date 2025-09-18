@@ -48,9 +48,9 @@
 ### Phase 2: 인증 시스템 완성 (우선순위: 높음)
 
 #### 2.1 JWT 토큰 시스템 개선
-- [ ] Access Token과 Refresh Token 분리
-- [ ] 토큰 갱신 API 구현 (`/v1/auth/refresh`)
-- [ ] 토큰 만료 처리 로직 개선
+- [x] Access Token과 Refresh Token 분리
+- [x] 토큰 갱신 API 구현 (`/v1/auth/refresh`)
+- [x] 토큰 만료 처리 로직 개선
 
 #### 2.2 소셜 로그인 구현
 - [ ] Google 로그인 API (`/v1/auth/google`)
@@ -59,8 +59,8 @@
 - [ ] 소셜 로그인 토큰 검증 로직
 
 #### 2.3 사용자 프로필 관리
-- [ ] 프로필 조회 API 개선 (`/v1/auth/profile`)
-- [ ] 프로필 수정 API 완성 (`/v1/auth/profile` PUT)
+- [x] 프로필 조회 API 개선 (`/v1/auth/profile`)
+- [x] 프로필 수정 API 완성 (`/v1/auth/profile` PUT)
 - [ ] 이메일 인증 기능 (선택사항)
 
 ### Phase 3: 약물 관리 API 완성 (우선순위: 높음)

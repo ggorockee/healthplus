@@ -3,7 +3,6 @@ from typing import Optional
 import uuid
 
 from app.infrastructure.database.models.user import User
-from app.application.schemas.auth import SignUpRequest, UserProfileUpdate
 
 
 class IUserRepository(ABC):
@@ -23,11 +22,19 @@ class IUserRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    async def create_user(self, signup_data: SignUpRequest) -> User:
+    async def create_user(
+        self,
+        email: str,
+        hashed_password: str = None,
+        display_name: str = None,
+        photo_url: str = None,
+        provider: str = "email",
+        is_email_verified: bool = False
+    ) -> User:
         """새로운 사용자를 생성합니다."""
         raise NotImplementedError
 
     @abstractmethod
-    async def update_user(self, user_id: uuid.UUID, update_data: UserProfileUpdate) -> Optional[User]:
+    async def update_user(self, user_id: uuid.UUID, **update_data) -> Optional[User]:
         """사용자 정보를 업데이트합니다."""
         raise NotImplementedError
