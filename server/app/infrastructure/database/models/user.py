@@ -8,7 +8,7 @@ from app.infrastructure.database.session import Base
 
 class User(Base):
     """
-    사용자 정보를 저장하는 ORM 모델
+    사용자 정보를 저장하는 ORM 모델 (API 명세서 기준)
     - Base를 상속받아 SQLAlchemy가 이 클래스를 테이블과 매핑합니다.
     """
     __tablename__ = "users"
@@ -19,11 +19,20 @@ class User(Base):
     # 이메일, 고유해야 하며 인덱스 설정으로 조회 성능 향상
     email = Column(String, unique=True, index=True, nullable=False)
 
-    # 해시된 비밀번호
-    hashed_password = Column(String, nullable=False)
+    # 해시된 비밀번호 (이메일 로그인용)
+    hashed_password = Column(String, nullable=True)
 
-    # 사용자 이름
-    name = Column(String, nullable=True)
+    # 사용자 표시명 (API 명세서 기준)
+    display_name = Column(String, nullable=True)
+
+    # 프로필 사진 URL (API 명세서 기준)
+    photo_url = Column(String, nullable=True)
+
+    # 로그인 제공자 (API 명세서 기준: email, google, facebook, kakao)
+    provider = Column(String, nullable=False, default="email")
+
+    # 이메일 인증 상태 (API 명세서 기준)
+    is_email_verified = Column(Boolean, default=False)
 
     # 계정 활성 상태 (소프트 삭제 등에 사용 가능)
     is_active = Column(Boolean, default=True)

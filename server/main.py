@@ -50,10 +50,20 @@ v1_app.include_router(api_router)
 # v1 앱에 대한 예외 처리기
 @v1_app.exception_handler(APIException)
 async def api_exception_handler(request: Request, exc: APIException):
-    """API 예외 처리"""
+    """API 예외 처리 (API 명세서 기준 응답 형식)"""
+    from app.application.schemas.common import APIErrorResponse, ErrorDetail
+    
+    error_response = APIErrorResponse(
+        error=ErrorDetail(
+            code=exc.error_code.value if hasattr(exc.error_code, 'value') else str(exc.error_code),
+            message=exc.detail,
+            field=exc.field
+        )
+    )
+    
     return JSONResponse(
         status_code=exc.status_code,
-        content={"detail": exc.detail, "error_code": exc.error_code}
+        content=error_response.model_dump()
     )
 
 # --------------------------------------------------------------------------
