@@ -40,8 +40,8 @@ v1_app = FastAPI(
     title="HealthPlus API v1",
     description="약물 복용 관리 애플리케이션 API - v1",
     version="1.0.0",
-    docs_url="/docs" if settings.DEBUG else None,      # 경로는 /v1/docs가 됨
-    redoc_url="/redoc" if settings.DEBUG else None,    # 경로는 /v1/redoc이 됨
+    docs_url="/docs" if settings.DEBUG else None,      # 최종 경로: <ROOT_PATH>/v1/docs
+    redoc_url="/redoc" if settings.DEBUG else None,    # 최종 경로: <ROOT_PATH>/v1/redoc
 )
 
 # v1 라우터를 접두사 없이 포함
@@ -57,16 +57,15 @@ async def api_exception_handler(request: Request, exc: APIException):
     )
 
 # --------------------------------------------------------------------------
-# 2. 전체를 감싸는 최상위(Root) Application 생성
+# 2. 실제 비즈니스 앱(inner)을 만들고, 필요 시 ROOT_PATH로 마운트
 # --------------------------------------------------------------------------
-app = FastAPI(
+inner_app = FastAPI(
     title="HealthPlus API",
     lifespan=lifespan,
-    root_path=settings.ROOT_PATH,
 )
 
-# 최상위 앱에 CORS 미들웨어 설정
-app.add_middleware(
+# CORS 미들웨어 (inner_app에 적용)
+inner_app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  # 프로덕션에서는 특정 도메인만 허용
     allow_credentials=True,
@@ -74,15 +73,23 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# 최상위 앱에 공용 헬스 체크 엔드포인트 추가
-@app.get("/health")
+# 공용 헬스 체크 (컨테이너 프로브는 직접 타므로 prefix 없이 유지)
+@inner_app.get("/health")
 async def health_check():
     """헬스 체크 엔드포인트"""
     return {"status": "healthy", "message": "HealthPlus API is running"}
 
+# v1 Sub-Application을 /v1 경로로 마운트
+inner_app.mount("/v1", v1_app)
 
-# 최상위 앱에 v1 Sub-Application을 /v1 경로로 마운트
-app.mount("/v1", v1_app)
+# --------------------------------------------------------------------------
+# 3. 외부 노출용 최상위 앱(root). ROOT_PATH가 있으면 그 경로에 inner_app을 마운트
+# --------------------------------------------------------------------------
+if settings.ROOT_PATH:
+    app = FastAPI()
+    app.mount(settings.ROOT_PATH, inner_app)
+else:
+    app = inner_app
 
 # --------------------------------------------------------------------------
 
