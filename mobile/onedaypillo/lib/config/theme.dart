@@ -1,37 +1,37 @@
 import 'package:flutter/material.dart';
 
 /// 앱 전역 테마 토큰 정의
-/// - 색상: Figma에서 반복 등장하는 팔레트 기반
+/// - 색상: Figma 디자인 시스템 기반 (design-tokens.json)
 /// - 타이포그래피: HelveticaNeue 계열 가중치/사이즈 맵핑
 class AppColors {
   AppColors._();
 
-  // Primary brand colors (깔끔한 그린 계열)
-  static const Color primary = Color(0xFF059669); // 메인 그린
-  static const Color primaryDark = Color(0xFF047857); // 다크 그린
-  static const Color primaryLight = Color(0xFFECFDF5); // 라이트 그린
+  // Primary brand colors (Figma 기반)
+  static const Color primary = Color(0xFF8E97FD); // 메인 보라색
+  static const Color primaryDark = Color(0xFF7583CA); // 다크 보라
+  static const Color primaryLight = Color(0xFFF2F3F7); // 라이트 그레이
 
-  // Secondary colors (보라색 계열 - 그린과 조화)
-  static const Color secondary = Color(0xFF8B5CF6); // 보라색
+  // Secondary colors (Figma 기반)
+  static const Color secondary = Color(0xFF7583CA); // 페이스북 버튼 색상
   static const Color secondaryLight = Color(0xFFF3F0FF); // 라이트 보라
 
-  // Accent colors (포인트 색상)
-  static const Color accent = Color(0xFF10B981); // 에메랄드 그린
+  // Accent colors (Figma 기반)
+  static const Color accent = Color(0xFF3F414E); // 다크 텍스트
   static const Color accentLight = Color(0xFFECFDF5); // 라이트 그린
   
-  // Tertiary colors (추가 포인트 색상)
+  // Tertiary colors (Figma 기반)
   static const Color tertiary = Color(0xFF6B7280); // 그레이
   static const Color tertiaryLight = Color(0xFFF9FAFB); // 라이트 그레이
 
-  // Text colors
-  static const Color textPrimary = Color(0xFF1F2937); // 다크 그레이
-  static const Color textSecondary = Color(0xFF6B7280); // 미디엄 그레이
-  static const Color textOnPrimary = Color(0xFFFFFFFF);
+  // Text colors (Figma 기반)
+  static const Color textPrimary = Color(0xFF3F414E); // 주요 텍스트
+  static const Color textSecondary = Color(0xFFA1A4B2); // 보조 텍스트
+  static const Color textOnPrimary = Color(0xFFF6F1FB); // 버튼 내 텍스트
   static const Color textOnDark = Color(0xFFF9FAFB);
 
-  // Surface colors
-  static const Color surface = Color(0xFFFFFFFF);
-  static const Color surfaceAlt = Color(0xFFF9FAFB); // 매우 연한 그레이
+  // Surface colors (Figma 기반)
+  static const Color surface = Color(0xFFFFFFFF); // 배경색
+  static const Color surfaceAlt = Color(0xFFF2F3F7); // 입력 필드 배경
   static const Color surfaceDark = Color(0xFF111827);
 
   // Utility colors
@@ -44,9 +44,15 @@ class AppColors {
   static const Color warning = Color(0xFFF59E0B); // 앰버
   static const Color info = Color(0xFF3B82F6); // 블루
 
-  // Border colors
-  static const Color border = Color(0xFFE5E7EB);
-  static const Color borderLight = Color(0xFFF3F4F6);
+  // Border colors (Figma 기반)
+  static const Color border = Color(0xFFEBEAEC); // 테두리 색상
+  static const Color borderLight = Color(0xFFE6E6E6); // 라이트 테두리
+
+  // Component specific colors (Figma 기반)
+  static const Color meditation = Color(0xFF8E97FD); // 명상 카드
+  static const Color relaxation = Color(0xFFFFC97E); // 릴랙세이션 카드
+  static const Color focus = Color(0xFFAFDBC5); // 포커스 카드
+  static const Color welcome = Color(0xFFFFECCC); // 웰컴 텍스트
 }
 
 class AppTypography {
@@ -54,61 +60,81 @@ class AppTypography {
 
   static const String fontFamily = 'HelveticaNeue';
 
+  // Figma 디자인 토큰 기반 타이포그래피
   static TextTheme textTheme = const TextTheme(
     displayLarge: TextStyle(
       fontFamily: fontFamily,
       fontWeight: FontWeight.w700,
-      fontSize: 40, // 34 -> 40 (40-50대 유저를 위한 증가)
-      height: 1.2,
+      fontSize: 30,
+      height: 41.13 / 30, // lineHeight: 41.13
+      letterSpacing: 0.3,
       color: AppColors.textPrimary,
-    ), // 예: 큰 타이틀 (Focus Attention, Happy Morning)
+    ),
     headlineSmall: TextStyle(
       fontFamily: fontFamily,
       fontWeight: FontWeight.w700,
-      fontSize: 28, // 20 -> 28
-      height: 1.3,
+      fontSize: 28,
+      height: 37.8 / 28, // lineHeight: 37.8
       color: AppColors.textPrimary,
     ),
     titleLarge: TextStyle(
       fontFamily: fontFamily,
       fontWeight: FontWeight.w700,
-      fontSize: 26, // 18 -> 26
-      height: 1.3,
+      fontSize: 18,
+      height: 19.46 / 18, // lineHeight: 19.46
       color: AppColors.textPrimary,
     ),
     titleMedium: TextStyle(
       fontFamily: fontFamily,
       fontWeight: FontWeight.w500,
-      fontSize: 20, // 16 -> 20
+      fontSize: 16,
       height: 1.3,
       color: AppColors.textPrimary,
     ),
     bodyLarge: TextStyle(
       fontFamily: fontFamily,
       fontWeight: FontWeight.w400,
-      fontSize: 20, // 새로 추가
-      height: 1.4,
+      fontSize: 16,
+      height: 17.3 / 16, // lineHeight: 17.3
+      letterSpacing: 0.8,
       color: AppColors.textPrimary,
     ),
     bodyMedium: TextStyle(
       fontFamily: fontFamily,
       fontWeight: FontWeight.w400,
-      fontSize: 18, // 16 -> 18
+      fontSize: 16,
       height: 1.4,
       color: AppColors.textPrimary,
     ),
     bodySmall: TextStyle(
       fontFamily: fontFamily,
       fontWeight: FontWeight.w400,
-      fontSize: 16, // 새로 추가
+      fontSize: 14,
       height: 1.3,
       color: AppColors.textSecondary,
     ),
     labelLarge: TextStyle(
       fontFamily: fontFamily,
       fontWeight: FontWeight.w500,
-      fontSize: 18, // 14 -> 18
+      fontSize: 14,
+      height: 15.13 / 14, // lineHeight: 15.13
       letterSpacing: 0.7,
+      color: AppColors.textPrimary,
+    ),
+    labelMedium: TextStyle(
+      fontFamily: fontFamily,
+      fontWeight: FontWeight.w400,
+      fontSize: 14,
+      height: 15.13 / 14,
+      letterSpacing: 0.7,
+      color: AppColors.textPrimary,
+    ),
+    labelSmall: TextStyle(
+      fontFamily: fontFamily,
+      fontWeight: FontWeight.w400,
+      fontSize: 12,
+      height: 12.97 / 12, // lineHeight: 12.97
+      letterSpacing: 0.6,
       color: AppColors.textPrimary,
     ),
   );
@@ -170,8 +196,7 @@ ThemeData buildLightTheme() {
         fontFamily: AppTypography.fontFamily,
         fontWeight: FontWeight.w300,
         fontSize: 16,
-        letterSpacing: 0.8,
-        color: AppColors.textSecondary,
+        color: Color(0xFFA1A4B2),
       ),
       contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 18),
     ),

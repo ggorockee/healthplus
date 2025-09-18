@@ -1,12 +1,14 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../config/theme.dart';
 import '../widgets/app_button.dart';
-import '../widgets/app_text.dart';
 import '../widgets/app_input.dart';
+import '../widgets/social_login_button.dart';
 import '../providers/auth_provider.dart';
+import 'login_screen.dart';
+import 'main_navigation_screen.dart';
 
-/// 회원가입 화면
 class SignUpScreen extends ConsumerStatefulWidget {
   const SignUpScreen({super.key});
 
@@ -21,7 +23,6 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
   final _confirmPasswordController = TextEditingController();
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
-  bool _agreeToTerms = false;
 
   @override
   void dispose() {
@@ -35,57 +36,103 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
   Widget build(BuildContext context) {
     final authState = ref.watch(authProvider);
 
+    // 인증 성공 시 메인 화면으로 이동
+    ref.listen(authProvider, (previous, next) {
+      if (next.isAuthenticated) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => const MainNavigationScreen()),
+        );
+      } else if (next.hasError) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(next.errorMessage ?? '회원가입에 실패했습니다.')),
+        );
+      }
+    });
+
     return Scaffold(
-      backgroundColor: AppColors.surface,
-      appBar: AppBar(
-        title: AppText.titleMedium('회원가입'),
-        backgroundColor: AppColors.surface,
-        foregroundColor: AppColors.textPrimary,
-        elevation: 0,
-        centerTitle: true,
-      ),
+      backgroundColor: AppColors.surface, // #FFFFFF
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24.0), // Figma 기반 패딩
           child: Form(
             key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const SizedBox(height: 20),
-                
-                // 회원가입 안내
-                AppText.titleMedium('새 계정 만들기'),
-                const SizedBox(height: 8),
-                AppText.bodyMedium(
-                  '하루 알약과 함께 건강한 약물 관리를 시작하세요',
-                  style: TextStyle(color: AppColors.textSecondary),
-                ),
-                
-                const SizedBox(height: 32),
-                
-                // 이메일 입력
-                AppText.bodyLarge('이메일'),
-                const SizedBox(height: 8),
-                AppInput(
-                  hintText: '이메일을 입력하세요',
-                  controller: _emailController,
-                  keyboardType: TextInputType.emailAddress,
-                ),
-                const SizedBox(height: 16),
-                
-                // 비밀번호 입력
-                AppText.bodyLarge('비밀번호'),
-                const SizedBox(height: 8),
-                TextField(
-                  controller: _passwordController,
-                  obscureText: _obscurePassword,
-                  decoration: InputDecoration(
-                    hintText: '비밀번호를 입력하세요 (8자 이상)',
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const SizedBox(height: 100), // 상단 여백
+                  
+                  // Create account 텍스트
+                  Text(
+                    'Create account',
+                    style: AppTypography.textTheme.headlineSmall?.copyWith(
+                      color: AppColors.textPrimary, // #3F414E
+                      fontSize: 28, // Figma: fontSize: 28
+                      fontWeight: FontWeight.w700, // Bold
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  
+                  const SizedBox(height: 100), // 텍스트와 버튼 사이 여백
+                  
+                  // Google 회원가입 버튼
+                  SocialLoginButton(
+                    type: SocialLoginType.google,
+                    onPressed: _signUpWithGoogle,
+                    isLoading: authState.isLoading,
+                  ),
+                  
+                  const SizedBox(height: 16),
+                  
+                  // Facebook 회원가입 버튼
+                  SocialLoginButton(
+                    type: SocialLoginType.facebook,
+                    onPressed: _signUpWithFacebook,
+                    isLoading: authState.isLoading,
+                  ),
+                  
+                  const SizedBox(height: 24),
+                  
+                  // OR LOG IN WITH EMAIL 텍스트
+                  Text(
+                    'OR LOG IN WITH EMAIL',
+                    style: AppTypography.textTheme.labelMedium?.copyWith(
+                      color: AppColors.textSecondary, // #A1A4B2
+                      fontWeight: FontWeight.w700, // Bold
+                      letterSpacing: 0.7, // Figma: letterSpacing: 0.7
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  
+                  const SizedBox(height: 24),
+                  
+                  // 이메일 입력 필드
+                  AppInput(
+                    hintText: 'Email address',
+                    controller: _emailController,
+                    keyboardType: TextInputType.emailAddress,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return '이메일을 입력해주세요';
+                      }
+                      if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+                        return '올바른 이메일 형식을 입력해주세요';
+                      }
+                      return null;
+                    },
+                  ),
+                  
+                  const SizedBox(height: 20),
+                  
+                  // 비밀번호 입력 필드
+                  AppInput(
+                    hintText: 'Password',
+                    controller: _passwordController,
+                    obscureText: _obscurePassword,
                     suffixIcon: IconButton(
                       icon: Icon(
-                        _obscurePassword ? Icons.visibility : Icons.visibility_off,
-                        color: AppColors.textSecondary,
+                        _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                        color: AppColors.textSecondary, // #A1A4B2
                       ),
                       onPressed: () {
                         setState(() {
@@ -93,22 +140,28 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                         });
                       },
                     ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return '비밀번호를 입력해주세요';
+                      }
+                      if (value.length < 6) {
+                        return '비밀번호는 6자 이상이어야 합니다';
+                      }
+                      return null;
+                    },
                   ),
-                ),
-                const SizedBox(height: 16),
-                
-                // 비밀번호 확인
-                AppText.bodyLarge('비밀번호 확인'),
-                const SizedBox(height: 8),
-                TextField(
-                  controller: _confirmPasswordController,
-                  obscureText: _obscureConfirmPassword,
-                  decoration: InputDecoration(
-                    hintText: '비밀번호를 다시 입력하세요',
+                  
+                  const SizedBox(height: 20),
+                  
+                  // 비밀번호 확인 입력 필드
+                  AppInput(
+                    hintText: 'Confirm Password',
+                    controller: _confirmPasswordController,
+                    obscureText: _obscureConfirmPassword,
                     suffixIcon: IconButton(
                       icon: Icon(
-                        _obscureConfirmPassword ? Icons.visibility : Icons.visibility_off,
-                        color: AppColors.textSecondary,
+                        _obscureConfirmPassword ? Icons.visibility_off : Icons.visibility,
+                        color: AppColors.textSecondary, // #A1A4B2
                       ),
                       onPressed: () {
                         setState(() {
@@ -116,89 +169,65 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                         });
                       },
                     ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return '비밀번호 확인을 입력해주세요';
+                      }
+                      if (value != _passwordController.text) {
+                        return '비밀번호가 일치하지 않습니다';
+                      }
+                      return null;
+                    },
                   ),
-                ),
-                
-                const SizedBox(height: 24),
-                
-                // 약관 동의
-                Row(
-                  children: [
-                    Checkbox(
-                      value: _agreeToTerms,
-                      onChanged: (value) {
-                        setState(() {
-                          _agreeToTerms = value ?? false;
-                        });
-                      },
-                      activeColor: AppColors.primary,
-                    ),
-                    Expanded(
-                      child: GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            _agreeToTerms = !_agreeToTerms;
-                          });
-                        },
-                        child: AppText.bodyMedium(
-                          '서비스 이용약관 및 개인정보처리방침에 동의합니다',
-                          style: TextStyle(color: AppColors.textSecondary),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                
-                const SizedBox(height: 24),
-                
-                // 회원가입 버튼
-                AppButton(
-                  label: '회원가입',
-                  onPressed: authState.isLoading ? null : _handleSignUp,
-                ),
-                
-                const SizedBox(height: 16),
-                
-                // 에러 메시지
-                if (authState.hasError)
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: AppColors.error.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: AppColors.error.withValues(alpha: 0.3)),
-                    ),
-                    child: AppText.bodySmall(
-                      authState.errorMessage ?? '알 수 없는 오류가 발생했습니다.',
-                      style: TextStyle(color: AppColors.error),
-                    ),
+                  
+                  const SizedBox(height: 20),
+                  
+                  // CREATE ACCOUNT 버튼
+                  AppButton(
+                    label: 'CREATE ACCOUNT',
+                    onPressed: authState.isLoading ? null : _signUpWithEmail,
+                    filled: true,
+                    isLoading: authState.isLoading,
                   ),
-                
-                const SizedBox(height: 24),
-                
-                // 로그인 링크
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    AppText.bodyMedium(
-                      '이미 계정이 있으신가요? ',
-                      style: TextStyle(color: AppColors.textSecondary),
-                    ),
-                    GestureDetector(
+                  
+                  const SizedBox(height: 60),
+                  
+                  // 로그인 링크
+                  Center(
+                    child: GestureDetector(
                       onTap: () {
-                        Navigator.pop(context);
+                        Navigator.of(context).pushReplacement(
+                          MaterialPageRoute(builder: (context) => const LoginScreen()),
+                        );
                       },
-                      child: AppText.bodyMedium(
-                        '로그인',
-                        style: TextStyle(
-                          color: AppColors.primary,
-                          fontWeight: FontWeight.w600,
+                      child: RichText(
+                        text: TextSpan(
+                          children: [
+                            TextSpan(
+                              text: 'ALREADY HAVE AN ACCOUNT? ',
+                              style: AppTypography.textTheme.labelMedium?.copyWith(
+                                color: AppColors.textPrimary, // #3F414E
+                                fontWeight: FontWeight.w500, // Medium
+                                letterSpacing: 0.7, // Figma: letterSpacing: 0.7
+                              ),
+                            ),
+                            TextSpan(
+                              text: 'LOG IN',
+                              style: AppTypography.textTheme.labelMedium?.copyWith(
+                                color: AppColors.black, // #000000
+                                fontWeight: FontWeight.w500, // Medium
+                                letterSpacing: 0.7, // Figma: letterSpacing: 0.7
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
-                  ],
-                ),
-              ],
+                  ),
+                  
+                  const SizedBox(height: 40),
+                ],
+              ),
             ),
           ),
         ),
@@ -206,43 +235,23 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
     );
   }
 
-  /// 회원가입 처리
-  void _handleSignUp() {
-    if (!_formKey.currentState!.validate()) return;
-    
-    final email = _emailController.text.trim();
-    final password = _passwordController.text.trim();
-    final confirmPassword = _confirmPasswordController.text.trim();
-    
-    // 입력 검증
-    if (email.isEmpty || password.isEmpty || confirmPassword.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('모든 필드를 입력해주세요')),
+  /// 이메일 회원가입
+  Future<void> _signUpWithEmail() async {
+    if (_formKey.currentState!.validate()) {
+      await ref.read(authProvider.notifier).signUpWithEmail(
+        _emailController.text.trim(),
+        _passwordController.text,
       );
-      return;
     }
-    
-    if (password.length < 8) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('비밀번호는 8자 이상이어야 합니다')),
-      );
-      return;
-    }
-    
-    if (password != confirmPassword) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('비밀번호가 일치하지 않습니다')),
-      );
-      return;
-    }
-    
-    if (!_agreeToTerms) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('서비스 이용약관에 동의해주세요')),
-      );
-      return;
-    }
-    
-    ref.read(authProvider.notifier).signUpWithEmail(email, password);
+  }
+
+  /// Google 회원가입
+  Future<void> _signUpWithGoogle() async {
+    await ref.read(authProvider.notifier).signInWithGoogle();
+  }
+
+  /// Facebook 회원가입 (실제로는 Kakao로 대체)
+  Future<void> _signUpWithFacebook() async {
+    await ref.read(authProvider.notifier).signInWithKakao();
   }
 }

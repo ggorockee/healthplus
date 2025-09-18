@@ -63,8 +63,12 @@ dependencies:
   
   # 차트 라이브러리
   fl_chart: ^0.68.0
+  flutter_dotenv: ^6.0.0
 
 dev_dependencies:
+  flutter_driver:
+    sdk: flutter
+  test: any
   flutter_test:
     sdk: flutter
 
@@ -92,6 +96,10 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - assets/images/
+    - .env.common
+    - .env.dev
+    - .env.prod
+
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

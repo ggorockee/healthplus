@@ -1,4 +1,6 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -18,6 +20,14 @@ final FirebaseAnalytics analytics = FirebaseAnalytics.instance;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // 환경 변수 로드
+  await dotenv.load(fileName: ".env.common");
+  if (kReleaseMode) {
+    await dotenv.load(fileName: ".env.prod");
+  } else {
+    await dotenv.load(fileName: ".env.dev");
+  }
   
   // Firebase 초기화
   await Firebase.initializeApp();

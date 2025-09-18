@@ -84,6 +84,84 @@ class AuthNotifier extends StateNotifier<AuthState> {
     }
   }
 
+  /// Google 로그인
+  Future<void> signInWithGoogle() async {
+    try {
+      state = state.copyWith(status: AuthStatus.loading);
+      
+      final user = await SupabaseAuthService.signInWithGoogle();
+      
+      if (user != null) {
+        state = state.copyWith(
+          status: AuthStatus.authenticated,
+          user: user,
+        );
+      } else {
+        state = state.copyWith(
+          status: AuthStatus.error,
+          errorMessage: 'Google 로그인에 실패했습니다.',
+        );
+      }
+    } catch (e) {
+      state = state.copyWith(
+        status: AuthStatus.error,
+        errorMessage: e.toString(),
+      );
+    }
+  }
+
+  /// Kakao 로그인
+  Future<void> signInWithKakao() async {
+    try {
+      state = state.copyWith(status: AuthStatus.loading);
+      
+      final user = await SupabaseAuthService.signInWithKakao();
+      
+      if (user != null) {
+        state = state.copyWith(
+          status: AuthStatus.authenticated,
+          user: user,
+        );
+      } else {
+        state = state.copyWith(
+          status: AuthStatus.error,
+          errorMessage: 'Kakao 로그인에 실패했습니다.',
+        );
+      }
+    } catch (e) {
+      state = state.copyWith(
+        status: AuthStatus.error,
+        errorMessage: e.toString(),
+      );
+    }
+  }
+
+  /// Apple 로그인
+  Future<void> signInWithApple() async {
+    try {
+      state = state.copyWith(status: AuthStatus.loading);
+      
+      final user = await SupabaseAuthService.signInWithApple();
+      
+      if (user != null) {
+        state = state.copyWith(
+          status: AuthStatus.authenticated,
+          user: user,
+        );
+      } else {
+        state = state.copyWith(
+          status: AuthStatus.error,
+          errorMessage: 'Apple 로그인에 실패했습니다.',
+        );
+      }
+    } catch (e) {
+      state = state.copyWith(
+        status: AuthStatus.error,
+        errorMessage: e.toString(),
+      );
+    }
+  }
+
   /// 로그아웃
   Future<void> signOut() async {
     try {
