@@ -40,12 +40,30 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     print("⛔ HealthPlus API 서버가 종료됩니다")
 
 
+import logging
+
+# ===================================================================
+# [DEBUG] 설정 값 확인을 위한 로깅
+# ===================================================================
+logger = logging.getLogger("uvicorn.error")
+logger.info("===================================================================")
+logger.info(f"[DEBUG] settings.ROOT_PATH: '{settings.ROOT_PATH}' (Type: {type(settings.ROOT_PATH)})")
+logger.info(f"[DEBUG] settings.DEBUG: {settings.DEBUG} (Type: {type(settings.DEBUG)})")
+
+docs_url = "/v1/docs" if settings.DEBUG else None
+redoc_url = "/v1/redoc" if settings.DEBUG else None
+
+logger.info(f"[DEBUG] Calculated docs_url: {docs_url}")
+logger.info(f"[DEBUG] Calculated redoc_url: {redoc_url}")
+logger.info("===================================================================")
+# ===================================================================
+
 app = FastAPI(
     title="HealthPlus API",
     description="약물 복용 관리 애플리케이션 API",
     version="1.0.0",
-    docs_url="/v1/docs" if settings.DEBUG else None,
-    redoc_url="/v1/redoc" if settings.DEBUG else None,
+    docs_url=docs_url,
+    redoc_url=redoc_url,
     lifespan=lifespan,
     root_path=settings.ROOT_PATH,
 )
