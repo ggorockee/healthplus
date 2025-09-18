@@ -65,4 +65,4 @@ jobs:
 
       - name: Update infra repository
         run: |
-          python scripts/update_infra_values.py ${{ needs.build-and-push.outputs.sha }} ${{ secrets.INFRA_GITHUB_TOKEN }}
+          python scripts/update_infra_values.py sha-${{ needs.build-and-push.outputs.sha }} ${{ secrets.INFRA_GITHUB_TOKEN }}
