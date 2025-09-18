@@ -5,6 +5,7 @@ import '../widgets/app_button.dart';
 import '../widgets/app_input.dart';
 import '../widgets/social_login_button.dart';
 import '../providers/auth_provider.dart';
+import '../providers/api_auth_provider.dart';
 import 'login_screen.dart';
 import 'main_navigation_screen.dart';
 import '../main.dart';
@@ -35,6 +36,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authProvider);
+    final apiAuthState = ref.watch(apiAuthProvider);
 
     // 인증 성공 시 메인 화면으로 이동
     ref.listen(authProvider, (previous, next) {
@@ -43,6 +45,19 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
           MaterialPageRoute(builder: (context) => const MainNavigationScreen()),
         );
       } else if (next.hasError) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(next.errorMessage ?? '회원가입에 실패했습니다.')),
+        );
+      }
+    });
+
+    // API 인증 성공 시 메인 화면으로 이동
+    ref.listen(apiAuthProvider, (previous, next) {
+      if (next.status == AuthStatus.authenticated) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => const MainNavigationScreen()),
+        );
+      } else if (next.status == AuthStatus.error) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(next.errorMessage ?? '회원가입에 실패했습니다.')),
         );
@@ -255,9 +270,11 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
     }
 
     if (_formKey.currentState!.validate()) {
-      await ref.read(authProvider.notifier).signUpWithEmail(
-        _emailController.text.trim(),
-        _passwordController.text,
+      // API 기반 회원가입 시도
+      await ref.read(apiAuthProvider.notifier).signUpWithEmail(
+        email: _emailController.text.trim(),
+        password: _passwordController.text,
+        displayName: _emailController.text.trim().split('@')[0], // 이메일에서 사용자명 추출
       );
     }
   }
