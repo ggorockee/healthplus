@@ -5,7 +5,7 @@
 OneDayPillo Flutter 앱에서 REST API를 활용한 백엔드 시스템으로의 마이그레이션을 위한 종합적인 개발 계획서입니다.
 
 ### 🎯 목표
-- 기존 Supabase/로컬 저장소 기반 시스템을 REST API 기반으로 마이그레이션
+- REST API 기반 시스템으로 완전 전환 (Supabase 클라이언트 제거)
 - 표준화된 API 클라이언트 아키텍처 구축
 - 확장 가능하고 유지보수 가능한 코드베이스 구현
 - 사용자 경험 개선 및 성능 최적화
@@ -64,8 +64,8 @@ OneDayPillo Flutter 앱에서 REST API를 활용한 백엔드 시스템으로의
 - [ ] 에러 모델 및 상태 모델 정의
 - [ ] 타입 안전성 보장
 
-### Phase 2: 인증 시스템 마이그레이션 (Week 2)
-**목표**: JWT 기반 인증 시스템으로 전환
+### Phase 2: 인증 시스템 구축 (Week 2)
+**목표**: JWT 기반 인증 시스템 구현
 
 #### 🔐 API 기반 인증 서비스
 - [ ] 이메일/패스워드 로그인 API 연동
@@ -74,18 +74,19 @@ OneDayPillo Flutter 앱에서 REST API를 활용한 백엔드 시스템으로의
 - [ ] 토큰 자동 갱신 로직
 - [ ] 로그아웃 API 연동
 
-#### 🌍 소셜 로그인 연동
-- [ ] Google 로그인 API 연동
-- [ ] Facebook 로그인 API 연동
-- [ ] Kakao 로그인 API 연동
-- [ ] Apple 로그인 API 연동
-- [ ] 소셜 토큰 검증 및 사용자 정보 매핑
+#### 🌍 소셜 로그인 연동 (보류)
+- [ ] ~~Google 로그인 API 연동~~ (보류)
+- [ ] ~~Facebook 로그인 API 연동~~ (보류)
+- [ ] ~~Kakao 로그인 API 연동~~ (보류)
+- [ ] ~~Apple 로그인 API 연동~~ (보류)
+- [ ] ~~소셜 토큰 검증 및 사용자 정보 매핑~~ (보류)
+- [ ] **현재 기존 Supabase 소셜 로그인 유지**
 
-#### 🔄 기존 시스템과 병행 운영
-- [ ] Feature Flag 기반 API/Supabase 전환
-- [ ] 기존 인증 로직 유지
-- [ ] 점진적 마이그레이션 전략
-- [ ] 롤백 계획 수립
+#### 🗑️ Supabase 클라이언트 제거
+- [ ] Supabase 인증 서비스 제거
+- [ ] Supabase 의존성 정리
+- [ ] 기존 인증 로직을 API 기반으로 완전 교체
+- [ ] 인증 상태 관리 API 기반으로 전환
 
 ### Phase 3: 약물 관리 시스템 (Week 3)
 **목표**: 약물 CRUD 작업을 API 기반으로 전환
@@ -101,7 +102,7 @@ OneDayPillo Flutter 앱에서 REST API를 활용한 백엔드 시스템으로의
 #### 🏛️ Repository 패턴 적용
 - [ ] MedicationRepository 인터페이스 설계
 - [ ] API 기반 Repository 구현체
-- [ ] 기존 로컬 저장소 Repository 유지
+- [ ] 로컬 캐시 Repository 구현 (오프라인 지원)
 - [ ] Repository 팩토리 패턴 구현
 - [ ] 의존성 주입 설정
 
@@ -241,9 +242,9 @@ OneDayPillo Flutter 앱에서 REST API를 활용한 백엔드 시스템으로의
 - **배포 실패**: 롤백 계획 수립
 
 ### 3. 완화 전략
-- **점진적 마이그레이션**: 한 번에 모든 것을 변경하지 않음
-- **Feature Flag**: 실시간 기능 전환 가능
-- **A/B 테스트**: 사용자 그룹별 테스트
+- **API 우선 개발**: 백엔드 API 먼저 구축 후 클라이언트 연동
+- **단계별 전환**: 인증 → 약물관리 → 복용로그 순서로 전환
+- **오프라인 지원**: 로컬 캐시로 네트워크 장애 대응
 - **모니터링**: 실시간 상태 추적
 
 ## 📋 체크리스트
@@ -257,10 +258,10 @@ OneDayPillo Flutter 앱에서 REST API를 활용한 백엔드 시스템으로의
 
 ### Phase 2: 인증 시스템 (Week 2)
 - [ ] 이메일/패스워드 API 연동
-- [ ] 소셜 로그인 API 연동
 - [ ] JWT 토큰 자동 갱신
-- [ ] Feature Flag 시스템
-- [ ] 기존 시스템과 병행 운영
+- [ ] Supabase 클라이언트 제거
+- [ ] API 기반 인증 완전 전환
+- [ ] 기존 Supabase 소셜 로그인 유지
 
 ### Phase 3: 약물 관리 (Week 3)
 - [ ] Repository 패턴 적용

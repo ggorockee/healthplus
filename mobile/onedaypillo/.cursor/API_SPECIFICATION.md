@@ -198,40 +198,13 @@ Content-Type: application/json
 }
 ```
 
-#### 1.3 Google 로그인
+#### 1.3 소셜 로그인 (보류)
 ```http
-POST /v1/auth/google
-Content-Type: application/json
-
-{
-  "idToken": "google_id_token",
-  "accessToken": "google_access_token"
-}
+# Google, Facebook, Kakao 로그인은 현재 보류
+# 기존 Supabase 소셜 로그인 유지 예정
 ```
 
-#### 1.4 Facebook 로그인
-```http
-POST /v1/auth/facebook
-Content-Type: application/json
-
-{
-  "accessToken": "facebook_access_token",
-  "userId": "facebook_user_id"
-}
-```
-
-#### 1.5 Kakao 로그인
-```http
-POST /v1/auth/kakao
-Content-Type: application/json
-
-{
-  "accessToken": "kakao_access_token",
-  "refreshToken": "kakao_refresh_token"
-}
-```
-
-#### 1.6 토큰 갱신
+#### 1.4 토큰 갱신
 ```http
 POST /v1/auth/refresh
 Content-Type: application/json
@@ -253,13 +226,13 @@ Content-Type: application/json
 }
 ```
 
-#### 1.7 로그아웃
+#### 1.5 로그아웃
 ```http
 POST /v1/auth/logout
 Authorization: Bearer {access_token}
 ```
 
-#### 1.8 사용자 프로필 조회
+#### 1.6 사용자 프로필 조회
 ```http
 GET /v1/auth/profile
 Authorization: Bearer {access_token}
@@ -283,7 +256,7 @@ Authorization: Bearer {access_token}
 }
 ```
 
-#### 1.9 사용자 프로필 수정
+#### 1.7 사용자 프로필 수정
 ```http
 PUT /v1/auth/profile
 Authorization: Bearer {access_token}
@@ -670,7 +643,7 @@ GET /v1/system/version
 - `AUTH_USER_NOT_FOUND`: 사용자를 찾을 수 없음
 - `AUTH_EMAIL_ALREADY_EXISTS`: 이메일이 이미 존재함
 - `AUTH_WEAK_PASSWORD`: 약한 비밀번호
-- `AUTH_SOCIAL_LOGIN_FAILED`: 소셜 로그인 실패
+- ~~`AUTH_SOCIAL_LOGIN_FAILED`: 소셜 로그인 실패~~ (보류)
 
 ### 약물 관리 관련 (MED_*)
 - `MED_MEDICATION_NOT_FOUND`: 약물을 찾을 수 없음
@@ -717,8 +690,8 @@ GET /v1/system/version
 #### Phase 2: 확장 기능 (우선순위 중간)
 1. 통계 및 분석
 2. 알림 시스템
-3. 소셜 로그인 통합
-4. API 테스트
+3. API 테스트
+4. ~~소셜 로그인 통합~~ (보류)
 
 #### Phase 3: 고급 기능 (우선순위 낮음)
 1. 실시간 알림
