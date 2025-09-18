@@ -21,8 +21,6 @@ from app.infrastructure.database.models import user, medications
 async def init_db():
     """애플리케이션 시작 시 데이터베이스 테이블을 생성합니다."""
     async with async_engine.begin() as conn:
-        # 기존 테이블을 삭제하고 다시 생성하려면 아래 주석을 해제하세요.
-        # await conn.run_sync(Base.metadata.drop_all)
         await conn.run_sync(Base.metadata.create_all)
     print("✅ 데이터베이스 테이블 초기화 완료")
 
@@ -30,36 +28,27 @@ async def init_db():
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     """앱 시작/종료 시 실행되는 코드"""
-    # 애플리케이션 시작 시
-    await init_db()
     print("🚀 HealthPlus API 서버가 시작되었습니다")
-
+    await init_db()
     yield
-
-    # 애플리케이션 종료 시
     print("⛔ HealthPlus API 서버가 종료됩니다")
 
-
-app = FastAPI(
-    title="HealthPlus API",
-    description="약물 복용 관리 애플리케이션 API",
+# --------------------------------------------------------------------------
+# 1. v1 API를 위한 Sub-Application 생성
+# --------------------------------------------------------------------------
+v1_app = FastAPI(
+    title="HealthPlus API v1",
+    description="약물 복용 관리 애플리케이션 API - v1",
     version="1.0.0",
-    docs_url="/v1/docs" if settings.DEBUG else None,
-    redoc_url="/v1/redoc" if settings.DEBUG else None,
-    lifespan=lifespan,
+    docs_url="/docs" if settings.DEBUG else None,      # 최종 경로: <ROOT_PATH>/v1/docs
+    redoc_url="/redoc" if settings.DEBUG else None,    # 최종 경로: <ROOT_PATH>/v1/redoc
 )
 
-# CORS 미들웨어 설정
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],  # 프로덕션에서는 특정 도메인만 허용
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# v1 라우터를 접두사 없이 포함
+v1_app.include_router(api_router)
 
-
-@app.exception_handler(APIException)
+# v1 앱에 대한 예외 처리기
+@v1_app.exception_handler(APIException)
 async def api_exception_handler(request: Request, exc: APIException):
     """API 예외 처리"""
     return JSONResponse(
@@ -67,16 +56,42 @@ async def api_exception_handler(request: Request, exc: APIException):
         content={"detail": exc.detail, "error_code": exc.error_code}
     )
 
+# --------------------------------------------------------------------------
+# 2. 실제 비즈니스 앱(inner)을 만들고, 필요 시 ROOT_PATH로 마운트
+# --------------------------------------------------------------------------
+inner_app = FastAPI(
+    title="HealthPlus API",
+    lifespan=lifespan,
+)
 
-@app.get("/health")
+# CORS 미들웨어 (inner_app에 적용)
+inner_app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # 프로덕션에서는 특정 도메인만 허용
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# 공용 헬스 체크 (컨테이너 프로브는 직접 타므로 prefix 없이 유지)
+@inner_app.get("/health")
 async def health_check():
     """헬스 체크 엔드포인트"""
     return {"status": "healthy", "message": "HealthPlus API is running"}
 
+# v1 Sub-Application을 /v1 경로로 마운트
+inner_app.mount("/v1", v1_app)
 
-# API 라우터 등록
-app.include_router(api_router, prefix="/v1")
+# --------------------------------------------------------------------------
+# 3. 외부 노출용 최상위 앱(root). ROOT_PATH가 있으면 그 경로에 inner_app을 마운트
+# --------------------------------------------------------------------------
+if settings.ROOT_PATH:
+    app = FastAPI()
+    app.mount(settings.ROOT_PATH, inner_app)
+else:
+    app = inner_app
 
+# --------------------------------------------------------------------------
 
 if __name__ == "__main__":
     uvicorn.run(

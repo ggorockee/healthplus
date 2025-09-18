@@ -10,6 +10,7 @@ async_engine = create_async_engine(
     settings.DATABASE_URL,
     echo=settings.DEBUG,  # DEBUG 모드일 때 SQL 쿼리 로그 출력
     pool_pre_ping=True,
+    connect_args={"statement_cache_size": 0}  # PgBouncer 호환성을 위함
 )
 
 # 비동기 세션 생성기
