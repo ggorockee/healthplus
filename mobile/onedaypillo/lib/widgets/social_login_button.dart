@@ -5,6 +5,7 @@ import '../config/theme.dart';
 enum SocialLoginType {
   google,
   facebook,
+  kakao,
   apple,
 }
 
@@ -100,6 +101,20 @@ class SocialLoginButton extends StatelessWidget {
             color: Colors.white,
           ),
         );
+      case SocialLoginType.kakao:
+        return Container(
+          width: 20,
+          height: 20,
+          decoration: const BoxDecoration(
+            color: Color(0xFFFEE500), // Kakao Yellow
+            shape: BoxShape.circle,
+          ),
+          child: const Icon(
+            Icons.chat_bubble_outline,
+            size: 16,
+            color: Colors.black,
+          ),
+        );
       case SocialLoginType.apple:
         return const Icon(
           Icons.apple,
@@ -116,6 +131,8 @@ class SocialLoginButton extends StatelessWidget {
         return 'CONTINUE WITH GOOGLE';
       case SocialLoginType.facebook:
         return 'CONTINUE WITH FACEBOOK';
+      case SocialLoginType.kakao:
+        return 'CONTINUE WITH KAKAO';
       case SocialLoginType.apple:
         return 'CONTINUE WITH APPLE';
     }
@@ -128,6 +145,8 @@ class SocialLoginButton extends StatelessWidget {
         return Colors.transparent; // outline 스타일
       case SocialLoginType.facebook:
         return AppColors.secondary; // #7583CA
+      case SocialLoginType.kakao:
+        return const Color(0xFFFEE500); // Kakao Yellow
       case SocialLoginType.apple:
         return Colors.black;
     }
@@ -142,6 +161,7 @@ class SocialLoginButton extends StatelessWidget {
           width: 1,
         );
       case SocialLoginType.facebook:
+      case SocialLoginType.kakao:
       case SocialLoginType.apple:
         return null;
     }
@@ -154,6 +174,8 @@ class SocialLoginButton extends StatelessWidget {
         return AppColors.textPrimary; // #3F414E
       case SocialLoginType.facebook:
         return AppColors.textOnPrimary; // #F6F1FB
+      case SocialLoginType.kakao:
+        return Colors.black; // Kakao는 검은 텍스트
       case SocialLoginType.apple:
         return Colors.white;
     }

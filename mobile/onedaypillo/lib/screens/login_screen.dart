@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../config/theme.dart';
 import '../widgets/app_button.dart';
-import '../widgets/app_text.dart';
 import '../widgets/app_input.dart';
 import '../widgets/social_login_button.dart';
 import '../providers/auth_provider.dart';
@@ -71,38 +70,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     textAlign: TextAlign.center,
                   ),
                   
-                  const SizedBox(height: 100), // 텍스트와 버튼 사이 여백
-                  
-                  // Google 로그인 버튼
-                  SocialLoginButton(
-                    type: SocialLoginType.google,
-                    onPressed: _signInWithGoogle,
-                    isLoading: authState.isLoading,
-                  ),
-                  
-                  const SizedBox(height: 16),
-                  
-                  // Facebook 로그인 버튼
-                  SocialLoginButton(
-                    type: SocialLoginType.facebook,
-                    onPressed: _signInWithFacebook,
-                    isLoading: authState.isLoading,
-                  ),
-                  
-                  const SizedBox(height: 24),
-                  
-                  // OR LOG IN WITH EMAIL 텍스트
-                  Text(
-                    'OR LOG IN WITH EMAIL',
-                    style: AppTypography.textTheme.labelMedium?.copyWith(
-                      color: AppColors.textSecondary, // #A1A4B2
-                      fontWeight: FontWeight.w700, // Bold
-                      letterSpacing: 0.7, // Figma: letterSpacing: 0.7
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 80), // 텍스트와 입력 필드 사이 여백
                   
                   // 이메일 입력 필드
                   AppInput(
@@ -181,7 +149,47 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ),
                   ),
                   
-                  const SizedBox(height: 60),
+                  const SizedBox(height: 40),
+                  
+                  // OR LOG IN WITH EMAIL 텍스트
+                  Text(
+                    'OR LOG IN WITH SOCIAL',
+                    style: AppTypography.textTheme.labelMedium?.copyWith(
+                      color: AppColors.textSecondary, // #A1A4B2
+                      fontWeight: FontWeight.w700, // Bold
+                      letterSpacing: 0.7, // Figma: letterSpacing: 0.7
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  
+                  const SizedBox(height: 24),
+                  
+                  // Google 로그인 버튼
+                  SocialLoginButton(
+                    type: SocialLoginType.google,
+                    onPressed: _signInWithGoogle,
+                    isLoading: authState.isLoading,
+                  ),
+                  
+                  const SizedBox(height: 16),
+                  
+                  // Facebook 로그인 버튼
+                  SocialLoginButton(
+                    type: SocialLoginType.facebook,
+                    onPressed: _signInWithFacebook,
+                    isLoading: authState.isLoading,
+                  ),
+                  
+                  const SizedBox(height: 16),
+                  
+                  // Kakao 로그인 버튼
+                  SocialLoginButton(
+                    type: SocialLoginType.kakao,
+                    onPressed: _signInWithKakao,
+                    isLoading: authState.isLoading,
+                  ),
+                  
+                  const SizedBox(height: 40),
                   
                   // 회원가입 링크
                   Center(
@@ -243,6 +251,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   /// Facebook 로그인 (실제로는 Kakao로 대체)
   Future<void> _signInWithFacebook() async {
+    await ref.read(authProvider.notifier).signInWithKakao();
+  }
+
+  /// Kakao 로그인
+  Future<void> _signInWithKakao() async {
     await ref.read(authProvider.notifier).signInWithKakao();
   }
 }

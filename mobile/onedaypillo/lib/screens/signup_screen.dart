@@ -1,4 +1,3 @@
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../config/theme.dart';
@@ -73,38 +72,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                     textAlign: TextAlign.center,
                   ),
                   
-                  const SizedBox(height: 100), // 텍스트와 버튼 사이 여백
-                  
-                  // Google 회원가입 버튼
-                  SocialLoginButton(
-                    type: SocialLoginType.google,
-                    onPressed: _signUpWithGoogle,
-                    isLoading: authState.isLoading,
-                  ),
-                  
-                  const SizedBox(height: 16),
-                  
-                  // Facebook 회원가입 버튼
-                  SocialLoginButton(
-                    type: SocialLoginType.facebook,
-                    onPressed: _signUpWithFacebook,
-                    isLoading: authState.isLoading,
-                  ),
-                  
-                  const SizedBox(height: 24),
-                  
-                  // OR LOG IN WITH EMAIL 텍스트
-                  Text(
-                    'OR LOG IN WITH EMAIL',
-                    style: AppTypography.textTheme.labelMedium?.copyWith(
-                      color: AppColors.textSecondary, // #A1A4B2
-                      fontWeight: FontWeight.w700, // Bold
-                      letterSpacing: 0.7, // Figma: letterSpacing: 0.7
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 80), // 텍스트와 입력 필드 사이 여백
                   
                   // 이메일 입력 필드
                   AppInput(
@@ -190,7 +158,47 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                     isLoading: authState.isLoading,
                   ),
                   
-                  const SizedBox(height: 60),
+                  const SizedBox(height: 40),
+                  
+                  // OR LOG IN WITH EMAIL 텍스트
+                  Text(
+                    'OR LOG IN WITH SOCIAL',
+                    style: AppTypography.textTheme.labelMedium?.copyWith(
+                      color: AppColors.textSecondary, // #A1A4B2
+                      fontWeight: FontWeight.w700, // Bold
+                      letterSpacing: 0.7, // Figma: letterSpacing: 0.7
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  
+                  const SizedBox(height: 24),
+                  
+                  // Google 회원가입 버튼
+                  SocialLoginButton(
+                    type: SocialLoginType.google,
+                    onPressed: _signUpWithGoogle,
+                    isLoading: authState.isLoading,
+                  ),
+                  
+                  const SizedBox(height: 16),
+                  
+                  // Facebook 회원가입 버튼
+                  SocialLoginButton(
+                    type: SocialLoginType.facebook,
+                    onPressed: _signUpWithFacebook,
+                    isLoading: authState.isLoading,
+                  ),
+                  
+                  const SizedBox(height: 16),
+                  
+                  // Kakao 회원가입 버튼
+                  SocialLoginButton(
+                    type: SocialLoginType.kakao,
+                    onPressed: _signUpWithKakao,
+                    isLoading: authState.isLoading,
+                  ),
+                  
+                  const SizedBox(height: 40),
                   
                   // 로그인 링크
                   Center(
@@ -252,6 +260,11 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
 
   /// Facebook 회원가입 (실제로는 Kakao로 대체)
   Future<void> _signUpWithFacebook() async {
+    await ref.read(authProvider.notifier).signInWithKakao();
+  }
+
+  /// Kakao 회원가입
+  Future<void> _signUpWithKakao() async {
     await ref.read(authProvider.notifier).signInWithKakao();
   }
 }
