@@ -1,4 +1,4 @@
-name: CI for Server
+name: CI/CD for Server
 
 on:
   push:
@@ -10,14 +10,15 @@ on:
       - '.github/workflows/ci-server.yml'
 
 jobs:
-  build-and-push-server:
+  build-and-push:
+    name: Build and Push Docker Image
     runs-on: ubuntu-latest
     permissions:
       contents: read
-
+    outputs:
+      sha: ${{ steps.vars.outputs.sha }}
     env:
       BUILD_MODE: ${{ github.ref_name == 'main' && 'production' || 'development' }}
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -43,3 +44,25 @@ jobs:
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/healthplus-${{ env.BUILD_MODE }}-server:sha-${{ steps.vars.outputs.sha }}
           build-args: |
             BUILD_MODE=${{ env.BUILD_MODE }}
+
+  update-infra-repository:
+    name: Update Infrastructure Repository
+    runs-on: ubuntu-latest
+    needs: build-and-push
+    if: github.ref_name == 'develop'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install Python dependencies
+        run: |
+          pip install ruamel.yaml GitPython
+
+      - name: Update infra repository
+        run: |
+          python scripts/update_infra_values.py ${{ needs.build-and-push.outputs.sha }} ${{ secrets.INFRA_GITHUB_TOKEN }}
