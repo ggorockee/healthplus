@@ -7,6 +7,7 @@ import '../widgets/social_login_button.dart';
 import '../providers/auth_provider.dart';
 import 'signup_screen.dart';
 import 'main_navigation_screen.dart';
+import '../main.dart';
 
 /// 로그인 화면
 class LoginScreen extends ConsumerStatefulWidget {
@@ -236,6 +237,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   /// 이메일 로그인
   Future<void> _signInWithEmail() async {
+    if (isIncubatorMode) {
+      // Incubator 모드에서는 바로 홈 화면으로 이동
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) => const MainNavigationScreen()),
+      );
+      return;
+    }
+
     if (_formKey.currentState!.validate()) {
       await ref.read(authProvider.notifier).signInWithEmail(
         _emailController.text.trim(),
@@ -246,16 +255,37 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   /// Google 로그인
   Future<void> _signInWithGoogle() async {
+    if (isIncubatorMode) {
+      // Incubator 모드에서는 바로 홈 화면으로 이동
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) => const MainNavigationScreen()),
+      );
+      return;
+    }
     await ref.read(authProvider.notifier).signInWithGoogle();
   }
 
   /// Facebook 로그인 (실제로는 Kakao로 대체)
   Future<void> _signInWithFacebook() async {
+    if (isIncubatorMode) {
+      // Incubator 모드에서는 바로 홈 화면으로 이동
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) => const MainNavigationScreen()),
+      );
+      return;
+    }
     await ref.read(authProvider.notifier).signInWithKakao();
   }
 
   /// Kakao 로그인
   Future<void> _signInWithKakao() async {
+    if (isIncubatorMode) {
+      // Incubator 모드에서는 바로 홈 화면으로 이동
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) => const MainNavigationScreen()),
+      );
+      return;
+    }
     await ref.read(authProvider.notifier).signInWithKakao();
   }
 }

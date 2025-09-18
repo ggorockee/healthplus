@@ -10,6 +10,7 @@ import '../providers/admob_provider.dart';
 import '../models/medication.dart';
 import '../models/medication_log.dart';
 import 'add_medication_screen.dart';
+import '../main.dart';
 
 /// 홈 화면 - 오늘의 약물 목록과 복용 체크
 class HomeScreen extends ConsumerStatefulWidget {
@@ -55,7 +56,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         foregroundColor: AppColors.textPrimary,
         elevation: 0,
         centerTitle: true,
-        toolbarHeight: 80,
+        toolbarHeight: isIncubatorMode ? 100 : 80, // Incubator 모드에서는 더 높게
         flexibleSpace: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
@@ -68,6 +69,22 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
+                // Incubator 모드 표시
+                if (isIncubatorMode)
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(vertical: 4),
+                    color: AppColors.warning.withValues(alpha: 0.9),
+                    child: Text(
+                      'INCUBATOR MODE',
+                      textAlign: TextAlign.center,
+                      style: AppTypography.textTheme.labelSmall?.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 1.0,
+                      ),
+                    ),
+                  ),
                 const SizedBox(height: 4),
                 _buildWeeklyCalendar(),
                 const SizedBox(height: 8),

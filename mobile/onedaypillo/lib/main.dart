@@ -18,6 +18,9 @@ import 'screens/main_navigation_screen.dart';
 // Firebase Analytics 전역 인스턴스
 final FirebaseAnalytics analytics = FirebaseAnalytics.instance;
 
+// 개발 단계 설정
+const bool isIncubatorMode = true; // 개발 초기 단계: true, 프로덕션: false
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -32,22 +35,25 @@ void main() async {
   // Firebase 초기화
   await Firebase.initializeApp();
   
-  // Firebase Crashlytics 설정
-  FlutterError.onError = (errorDetails) {
-    FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
-  };
+  // Incubator 모드에서는 일부 서비스 비활성화
+  if (!isIncubatorMode) {
+    // Firebase Crashlytics 설정
+    FlutterError.onError = (errorDetails) {
+      FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
+    };
+    
+    // Firebase Performance 모니터링 활성화
+    await FirebasePerformance.instance.setPerformanceCollectionEnabled(true);
+    
+    // Firebase Remote Config 초기화
+    await FirebaseConfig.initializeRemoteConfig();
+    
+    // AdMob 초기화
+    await MobileAds.instance.initialize();
+  }
   
-  // Firebase Performance 모니터링 활성화
-  await FirebasePerformance.instance.setPerformanceCollectionEnabled(true);
-  
-  // Firebase Remote Config 초기화
-  await FirebaseConfig.initializeRemoteConfig();
-  
-  // Supabase 초기화
+  // Supabase 초기화 (개발 단계에서도 필요)
   await SupabaseConfig.initialize();
-  
-  // AdMob 초기화
-  await MobileAds.instance.initialize();
   
   runApp(const ProviderScope(child: DailyPillApp()));
 }
@@ -58,10 +64,10 @@ class DailyPillApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: '하루 알약',
+      title: isIncubatorMode ? '하루 알약 (Incubator)' : '하루 알약',
       theme: buildLightTheme(),
       home: const AuthWrapper(),
-      debugShowCheckedModeBanner: false,
+      debugShowCheckedModeBanner: isIncubatorMode, // Incubator 모드에서는 디버그 배너 표시
     );
   }
 }
@@ -72,6 +78,11 @@ class AuthWrapper extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Incubator 모드에서는 바로 홈 화면으로 이동
+    if (isIncubatorMode) {
+      return const MainNavigationScreen();
+    }
+
     final authState = ref.watch(authProvider);
 
     // 로딩 중
