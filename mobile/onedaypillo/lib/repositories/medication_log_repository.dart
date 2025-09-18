@@ -1,6 +1,5 @@
 import '../models/medication_log.dart';
 import '../models/medication_log_api.dart';
-import '../models/api_response.dart';
 import '../config/api_config.dart';
 import '../services/api_client.dart';
 

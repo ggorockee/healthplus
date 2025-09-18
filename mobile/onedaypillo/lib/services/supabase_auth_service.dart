@@ -171,7 +171,7 @@ class SupabaseAuthService {
       }
 
       // 카카오 로그인 실행
-      final kakao.OAuthToken token = await kakao.UserApi.instance.loginWithKakaoTalk();
+      await kakao.UserApi.instance.loginWithKakaoTalk();
       
       // 사용자 정보 가져오기
       final kakao.User kakaoUser = await kakao.UserApi.instance.me();

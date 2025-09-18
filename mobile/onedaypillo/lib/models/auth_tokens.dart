@@ -1,3 +1,5 @@
+import 'user.dart';
+
 /// JWT 토큰 모델
 class AuthTokens {
   final String accessToken;

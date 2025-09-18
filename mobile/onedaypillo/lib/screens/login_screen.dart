@@ -6,6 +6,7 @@ import '../widgets/app_input.dart';
 import '../widgets/social_login_button.dart';
 import '../providers/auth_provider.dart';
 import '../providers/api_auth_provider.dart';
+import '../models/user.dart';
 import 'signup_screen.dart';
 import 'main_navigation_screen.dart';
 import '../main.dart';
@@ -34,7 +35,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authProvider);
-    final apiAuthState = ref.watch(apiAuthProvider);
 
     // 인증 성공 시 메인 화면으로 이동
     ref.listen(authProvider, (previous, next) {

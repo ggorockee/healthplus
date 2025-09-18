@@ -1,6 +1,7 @@
 import '../models/medication.dart';
 import '../models/medication_api.dart';
-import '../models/api_response.dart';
+import '../services/api_client.dart';
+import '../config/api_config.dart';
 
 /// 약물 관리 Repository 인터페이스
 abstract class MedicationRepository {

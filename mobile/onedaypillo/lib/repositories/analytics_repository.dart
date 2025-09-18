@@ -1,5 +1,4 @@
 import '../models/analytics_api.dart';
-import '../models/api_response.dart';
 import '../config/api_config.dart';
 import '../services/api_client.dart';
 
@@ -137,7 +136,6 @@ class ApiAnalyticsRepository implements AnalyticsRepository {
 
 /// 로컬 캐시 통계 Repository 구현체
 class LocalAnalyticsRepository implements AnalyticsRepository {
-  final List<dynamic> _logs = []; // 실제로는 MedicationLog 리스트
   
   @override
   Future<MedicationStatsResponse> getMedicationStats({

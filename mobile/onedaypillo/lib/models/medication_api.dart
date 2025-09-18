@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'medication.dart';
 
 /// 약물 목록 응답 모델

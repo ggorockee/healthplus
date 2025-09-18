@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/medication_log.dart';
 import '../repositories/medication_log_repository.dart';
@@ -239,10 +238,14 @@ class ApiMedicationLogNotifier extends StateNotifier<MedicationLogState> {
       
       // 이미 오늘 복용 로그가 있는지 확인
       final existingLogs = await getLogsByDate(today);
-      final existingLog = existingLogs.firstWhere(
-        (log) => log.medicationId == medicationId,
-        orElse: () => null,
-      );
+      MedicationLog? existingLog;
+      try {
+        existingLog = existingLogs.firstWhere(
+          (log) => log.medicationId == medicationId,
+        );
+      } catch (e) {
+        existingLog = null;
+      }
 
       if (existingLog != null) {
         // 기존 로그 업데이트
