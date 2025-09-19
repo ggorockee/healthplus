@@ -622,3 +622,4 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 
 *이 문서는 OneDayPillo API v1.0.0 기준으로 작성되었습니다.*
 *최종 업데이트: 2024-01-01*
+

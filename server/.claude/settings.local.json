@@ -4,9 +4,14 @@
       "Read(//d/github/healthplus/**)",
       "Bash(xargs ls:*)",
       "Bash(cat:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(tree:*)",
+      "Read(//Users/woohyeon/**)",
+      "Bash(claude mcp:*)",
+      "mcp__sequential-thinking__sequentialthinking"
     ],
     "deny": [],
     "ask": []
-  }
+  },
+  "outputStyle": "korean-developer"
 }
