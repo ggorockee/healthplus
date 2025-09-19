@@ -28,12 +28,18 @@ class AnalyticsService:
         """약물 복용 통계 조회 (API 명세서 기준)"""
         # 날짜 범위 설정
         if start_date:
-            start_dt = datetime.fromisoformat(start_date)
+            try:
+                start_dt = datetime.fromisoformat(start_date)
+            except ValueError:
+                raise ValidationError("Invalid start_date format. Use YYYY-MM-DD format.", ErrorCode.VALIDATION_ERROR)
         else:
             start_dt = datetime.now() - timedelta(days=30)  # 기본 30일
         
         if end_date:
-            end_dt = datetime.fromisoformat(end_date)
+            try:
+                end_dt = datetime.fromisoformat(end_date)
+            except ValueError:
+                raise ValidationError("Invalid end_date format. Use YYYY-MM-DD format.", ErrorCode.VALIDATION_ERROR)
         else:
             end_dt = datetime.now()
 
@@ -41,7 +47,7 @@ class AnalyticsService:
         medications = await self.med_repo.get_medications_by_user_id(user_id)
         
         # 복용 로그 조회
-        logs = await self.med_repo.get_medication_logs(
+        logs = await self.med_repo.get_records_by_date_range(
             user_id=user_id,
             start_date=start_dt,
             end_date=end_dt
@@ -99,11 +105,11 @@ class AnalyticsService:
             medications = await self.med_repo.get_medications_by_user_id(user_id)
 
         # 복용 로그 조회
-        logs = await self.med_repo.get_medication_logs(
+        logs = await self.med_repo.get_records_by_date_range(
             user_id=user_id,
-            medication_id=uuid.UUID(medication_id) if medication_id else None,
             start_date=start_date,
-            end_date=end_date
+            end_date=end_date,
+            medication_id=uuid.UUID(medication_id) if medication_id else None
         )
 
         # 예상 복용 횟수 계산 (약물별로)
@@ -111,10 +117,24 @@ class AnalyticsService:
         for med in medications:
             # 반복 요일에 따른 예상 복용 횟수 계산
             days_in_period = (end_date - start_date).days + 1
-            repeat_days = med.repeat_days
-            expected_count = sum(1 for day in range(days_in_period) 
-                              if (start_date + timedelta(days=day)).weekday() + 1 in repeat_days)
-            total_expected += expected_count
+            
+            # repeat_days를 안전하게 처리
+            try:
+                if isinstance(med.repeat_days, str):
+                    # JSON 문자열인 경우 파싱
+                    import json
+                    repeat_days = json.loads(med.repeat_days)
+                elif isinstance(med.repeat_days, list):
+                    repeat_days = med.repeat_days
+                else:
+                    continue
+                    
+                expected_count = sum(1 for day in range(days_in_period) 
+                                  if (start_date + timedelta(days=day)).weekday() + 1 in repeat_days)
+                total_expected += expected_count
+            except (json.JSONDecodeError, TypeError):
+                # JSON 파싱 실패 시 건너뛰기
+                continue
 
         # 실제 복용 횟수
         total_taken = len([log for log in logs if log.is_taken])
@@ -154,18 +174,18 @@ class AnalyticsService:
             medication_name = "전체"
 
         # 복용 로그 조회
-        logs = await self.med_repo.get_medication_logs(
+        logs = await self.med_repo.get_records_by_date_range(
             user_id=user_id,
-            medication_id=uuid.UUID(medication_id) if medication_id else None,
             start_date=start_date,
-            end_date=end_date
+            end_date=end_date,
+            medication_id=uuid.UUID(medication_id) if medication_id else None
         )
 
         # 히스토리 엔트리 생성
         history = []
         for log in logs:
             history.append(HistoryEntry(
-                date=log.taken_at.strftime("%Y-%m-%d"),
+                date=log.date.strftime("%Y-%m-%d") if log.date else log.taken_at.strftime("%Y-%m-%d"),
                 taken_at=log.taken_at,
                 is_taken=log.is_taken,
                 note=log.note

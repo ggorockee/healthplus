@@ -48,7 +48,7 @@ class MedicationCreate(BaseModel):
     name: str = Field(..., min_length=1, max_length=100, description="약물명")
     dosage: str = Field(..., min_length=1, max_length=50, description="복용량 (예: 1정, 2캡슐)")
     notification_time: NotificationTime = Field(..., description="알림 시간")
-    repeat_days: List[int] = Field(..., min_items=1, max_items=7, description="반복 요일 (1=월요일, 7=일요일)")
+    repeat_days: List[int] = Field(..., min_length=1, max_length=7, description="반복 요일 (1=월요일, 7=일요일)")
     
     # 기존 필드들 (호환성을 위해 유지)
     image_path: Optional[str] = None
@@ -68,7 +68,7 @@ class MedicationUpdate(BaseModel):
     name: Optional[str] = Field(None, min_length=1, max_length=100)
     dosage: Optional[str] = Field(None, min_length=1, max_length=50)
     notification_time: Optional[NotificationTime] = None
-    repeat_days: Optional[List[int]] = Field(None, min_items=1, max_items=7)
+    repeat_days: Optional[List[int]] = Field(None, min_length=1, max_length=7)
     is_active: Optional[bool] = None
     
     # 기존 필드들 (호환성을 위해 유지)

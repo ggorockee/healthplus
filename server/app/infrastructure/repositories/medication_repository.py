@@ -18,9 +18,15 @@ class SQLAlchemyMedicationRepository(IMedicationRepository):
         self.session = session
 
     async def create_medication(self, user_id: uuid.UUID, medication_data: MedicationCreate) -> Medication:
+        # MedicationCreate의 notification_time을 notification_hour, notification_minute으로 변환
+        data_dict = medication_data.model_dump()
+        notification_time = data_dict.pop('notification_time')
+        data_dict['notification_hour'] = notification_time['hour']
+        data_dict['notification_minute'] = notification_time['minute']
+        
         medication = Medication(
             user_id=user_id,
-            **medication_data.model_dump()
+            **data_dict
         )
         self.session.add(medication)
         await self.session.commit()
@@ -68,7 +74,8 @@ class SQLAlchemyMedicationRepository(IMedicationRepository):
             time=datetime.strptime(record_data.time, '%H:%M:%S').time(),
             status=record_data.status.value,
             delay_reason=record_data.delay_reason,
-            taken_at=datetime.utcnow() if record_data.status == 'taken' else None
+            taken_at=datetime.utcnow() if record_data.status == 'taken' else None,
+            is_taken=record_data.status == 'taken'
         )
         self.session.add(record)
         await self.session.commit()
@@ -115,5 +122,47 @@ class SQLAlchemyMedicationRepository(IMedicationRepository):
                 extract('month', MedicationRecord.date) == month
             )
         )
+        result = await self.session.execute(stmt)
+        return result.scalars().all()
+
+    async def get_records_by_date_range(
+        self, 
+        user_id: uuid.UUID, 
+        start_date: datetime, 
+        end_date: datetime,
+        medication_id: Optional[uuid.UUID] = None
+    ) -> List[MedicationRecord]:
+        """날짜 범위로 복용 기록 조회"""
+        conditions = [
+            MedicationRecord.user_id == user_id,
+            MedicationRecord.date >= start_date.date(),
+            MedicationRecord.date <= end_date.date()
+        ]
+        
+        if medication_id:
+            conditions.append(MedicationRecord.medication_id == medication_id)
+            
+        stmt = select(MedicationRecord).where(and_(*conditions))
+        result = await self.session.execute(stmt)
+        return result.scalars().all()
+
+    async def get_records_by_date_range(
+        self, 
+        user_id: uuid.UUID, 
+        start_date: datetime, 
+        end_date: datetime,
+        medication_id: Optional[uuid.UUID] = None
+    ) -> List[MedicationRecord]:
+        """날짜 범위로 복용 기록을 조회합니다."""
+        conditions = [
+            MedicationRecord.user_id == user_id,
+            MedicationRecord.date >= start_date.date(),
+            MedicationRecord.date <= end_date.date()
+        ]
+        
+        if medication_id:
+            conditions.append(MedicationRecord.medication_id == medication_id)
+            
+        stmt = select(MedicationRecord).where(and_(*conditions))
         result = await self.session.execute(stmt)
         return result.scalars().all()

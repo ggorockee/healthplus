@@ -38,7 +38,14 @@ class ReminderRepository(IReminderRepository):
         self.db.add(reminder)
         await self.db.commit()
         await self.db.refresh(reminder)
-        return reminder
+        
+        # Eagerly load the medication relationship
+        result = await self.db.execute(
+            select(Reminder)
+            .options(selectinload(Reminder.medication))
+            .where(Reminder.id == reminder.id)
+        )
+        return result.scalar_one()
 
     async def get_reminders_by_user_id(self, user_id: uuid.UUID) -> List:
         """사용자의 알림 설정 목록 조회"""
@@ -91,7 +98,14 @@ class ReminderRepository(IReminderRepository):
 
         await self.db.commit()
         await self.db.refresh(reminder)
-        return reminder
+        
+        # Eagerly load the medication relationship
+        result = await self.db.execute(
+            select(Reminder)
+            .options(selectinload(Reminder.medication))
+            .where(Reminder.id == reminder.id)
+        )
+        return result.scalar_one()
 
     async def delete_reminder(self, user_id: uuid.UUID, reminder_id: uuid.UUID) -> bool:
         """알림 설정 삭제"""

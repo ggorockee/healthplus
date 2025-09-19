@@ -12,18 +12,19 @@ from app.application.schemas.medication import (
     DailyMedicationRecord, MedicationDoseResponse,
     MonthlyStatistics
 )
+from app.application.schemas.common import APIResponse
 from app.application.services.medication_service import MedicationService
 from app.api.v1.deps import get_medication_service, get_current_user_id
 from app.core.exceptions import NotFoundError, ValidationError
 from app.core.error_codes import ErrorCode
 
 
-router = APIRouter(prefix="/medicine", tags=["약물 관리"])
+router = APIRouter(tags=["약물 관리"])
 
 
 # API 명세서 기준 엔드포인트들
 
-@router.post("", response_model=MedicationResponse)
+@router.post("")
 async def create_medication(
     medication_data: MedicationCreate,
     user_id: uuid.UUID = Depends(get_current_user_id),
@@ -31,21 +32,51 @@ async def create_medication(
 ):
     """약물 추가 (API 명세서 기준)"""
     try:
-        return await med_service.create_medication(user_id, medication_data)
+        medication = await med_service.create_medication(user_id, medication_data)
+        return APIResponse(
+            success=True,
+            data=medication.model_dump(),
+            message="약물이 성공적으로 등록되었습니다"
+        )
     except ValidationError as e:
         raise HTTPException(status_code=e.status_code, detail=e.detail)
 
 
-@router.get("", response_model=MedicationListResponse)
+@router.get("")
 async def get_medications(
     user_id: uuid.UUID = Depends(get_current_user_id),
     med_service: MedicationService = Depends(get_medication_service)
 ):
     """약물 목록 조회 (API 명세서 기준)"""
-    return await med_service.get_medications(user_id)
+    try:
+        medications = await med_service.get_medications(user_id)
+        return APIResponse(
+            success=True,
+            data=medications.model_dump(),
+            message="약물 목록 조회 성공"
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to get medications: {str(e)}")
 
 
-@router.get("/{medication_id}", response_model=MedicationResponse)
+@router.get("/today")
+async def get_today_medications(
+    user_id: uuid.UUID = Depends(get_current_user_id),
+    med_service: MedicationService = Depends(get_medication_service)
+):
+    """오늘의 약물 목록 (API 명세서 기준)"""
+    try:
+        today_medications = await med_service.get_today_medications(user_id)
+        return APIResponse(
+            success=True,
+            data=today_medications.model_dump(),
+            message="오늘의 약물 목록 조회 성공"
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to get today's medications: {str(e)}")
+
+
+@router.get("/{medication_id}")
 async def get_medication(
     medication_id: uuid.UUID,
     user_id: uuid.UUID = Depends(get_current_user_id),
@@ -53,12 +84,17 @@ async def get_medication(
 ):
     """특정 약물 조회 (API 명세서 기준)"""
     try:
-        return await med_service.get_medication(user_id, medication_id)
+        medication = await med_service.get_medication(user_id, medication_id)
+        return APIResponse(
+            success=True,
+            data=medication.model_dump(),
+            message="약물 조회 성공"
+        )
     except NotFoundError as e:
         raise HTTPException(status_code=e.status_code, detail=e.detail)
 
 
-@router.put("/{medication_id}", response_model=MedicationResponse)
+@router.put("/{medication_id}")
 async def update_medication(
     medication_id: uuid.UUID,
     medication_data: MedicationUpdate,
@@ -67,7 +103,12 @@ async def update_medication(
 ):
     """약물 수정 (API 명세서 기준)"""
     try:
-        return await med_service.update_medication(user_id, medication_id, medication_data)
+        medication = await med_service.update_medication(user_id, medication_id, medication_data)
+        return APIResponse(
+            success=True,
+            data=medication.model_dump(),
+            message="약물 수정 성공"
+        )
     except NotFoundError as e:
         raise HTTPException(status_code=e.status_code, detail=e.detail)
 
@@ -85,18 +126,9 @@ async def delete_medication(
     return {"message": "약물이 삭제되었습니다."}
 
 
-@router.get("/today", response_model=TodayMedicationResponse)
-async def get_today_medications(
-    user_id: uuid.UUID = Depends(get_current_user_id),
-    med_service: MedicationService = Depends(get_medication_service)
-):
-    """오늘의 약물 목록 (API 명세서 기준)"""
-    return await med_service.get_today_medications(user_id)
-
-
 # 복용 로그 관련 엔드포인트들 (API 명세서 기준)
 
-@router.post("/medication-log", response_model=MedicationLogResponse)
+@router.post("/medication-log")
 async def create_medication_log(
     log_data: MedicationLogCreate,
     user_id: uuid.UUID = Depends(get_current_user_id),
@@ -104,12 +136,17 @@ async def create_medication_log(
 ):
     """복용 로그 기록 (API 명세서 기준)"""
     try:
-        return await med_service.create_medication_log(user_id, log_data)
+        log = await med_service.create_medication_log(user_id, log_data)
+        return APIResponse(
+            success=True,
+            data=log.model_dump(),
+            message="복용 로그가 성공적으로 기록되었습니다"
+        )
     except (ValidationError, NotFoundError) as e:
         raise HTTPException(status_code=e.status_code, detail=e.detail)
 
 
-@router.get("/medication-log", response_model=MedicationLogListResponse)
+@router.get("/medication-log")
 async def get_medication_logs(
     medication_id: Optional[str] = Query(None, description="약물 ID"),
     start_date: Optional[str] = Query(None, description="시작 날짜 (YYYY-MM-DD)"),
@@ -118,15 +155,23 @@ async def get_medication_logs(
     med_service: MedicationService = Depends(get_medication_service)
 ):
     """복용 로그 조회 (API 명세서 기준)"""
-    return await med_service.get_medication_logs(
-        user_id=user_id,
-        medication_id=medication_id,
-        start_date=start_date,
-        end_date=end_date
-    )
+    try:
+        logs = await med_service.get_medication_logs(
+            user_id=user_id,
+            medication_id=medication_id,
+            start_date=start_date,
+            end_date=end_date
+        )
+        return APIResponse(
+            success=True,
+            data=logs.model_dump(),
+            message="복용 로그 조회 성공"
+        )
+    except ValidationError as e:
+        raise HTTPException(status_code=e.status_code, detail=e.detail)
 
 
-@router.put("/medication-log/{log_id}", response_model=MedicationLogResponse)
+@router.put("/medication-log/{log_id}")
 async def update_medication_log(
     log_id: uuid.UUID,
     update_data: MedicationLogUpdate,
@@ -135,7 +180,12 @@ async def update_medication_log(
 ):
     """복용 로그 수정 (API 명세서 기준)"""
     try:
-        return await med_service.update_medication_log(user_id, log_id, update_data)
+        log = await med_service.update_medication_log(user_id, log_id, update_data)
+        return APIResponse(
+            success=True,
+            data=log.model_dump(),
+            message="복용 로그가 성공적으로 수정되었습니다"
+        )
     except NotFoundError as e:
         raise HTTPException(status_code=e.status_code, detail=e.detail)
 
@@ -147,10 +197,17 @@ async def delete_medication_log(
     med_service: MedicationService = Depends(get_medication_service)
 ):
     """복용 로그 삭제 (API 명세서 기준)"""
-    success = await med_service.delete_medication_log(user_id, log_id)
-    if not success:
-        raise HTTPException(status_code=404, detail="복용 로그를 찾을 수 없습니다")
-    return {"message": "복용 로그가 삭제되었습니다."}
+    try:
+        success = await med_service.delete_medication_log(user_id, log_id)
+        if not success:
+            raise HTTPException(status_code=404, detail="복용 로그를 찾을 수 없습니다")
+        return APIResponse(
+            success=True,
+            data=None,
+            message="복용 로그가 성공적으로 삭제되었습니다"
+        )
+    except NotFoundError as e:
+        raise HTTPException(status_code=e.status_code, detail=e.detail)
 
 
 # 기존 호환성 엔드포인트들 (하위 호환성을 위해 유지)

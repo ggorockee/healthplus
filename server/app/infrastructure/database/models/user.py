@@ -2,8 +2,39 @@ import uuid
 from sqlalchemy import Column, String, Boolean, DateTime, func
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.types import TypeDecorator, CHAR
 
 from app.infrastructure.database.session import Base
+
+
+class GUID(TypeDecorator):
+    """SQLite 호환 UUID 타입"""
+    impl = CHAR
+    cache_ok = True
+
+    def load_dialect_impl(self, dialect):
+        if dialect.name == 'postgresql':
+            return dialect.type_descriptor(UUID())
+        else:
+            return dialect.type_descriptor(CHAR(36))
+
+    def process_bind_param(self, value, dialect):
+        if value is None:
+            return value
+        elif dialect.name == 'postgresql':
+            return str(value)
+        else:
+            if not isinstance(value, uuid.UUID):
+                return str(uuid.UUID(value))
+            return str(value)
+
+    def process_result_value(self, value, dialect):
+        if value is None:
+            return value
+        else:
+            if not isinstance(value, uuid.UUID):
+                return uuid.UUID(value)
+            return value
 
 
 class User(Base):
@@ -13,8 +44,8 @@ class User(Base):
     """
     __tablename__ = "users"
 
-    # Primary Key, UUID v4를 기본값으로 사용
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    # Primary Key, UUID v4를 기본값으로 사용 (SQLite 호환)
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
 
     # 이메일, 고유해야 하며 인덱스 설정으로 조회 성능 향상
     email = Column(String, unique=True, index=True, nullable=False)

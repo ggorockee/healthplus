@@ -87,8 +87,20 @@ class NotificationService:
         status: Optional[str] = None
     ) -> NotificationLogListResponse:
         """알림 로그 조회"""
-        start_dt = datetime.fromisoformat(start_date) if start_date else None
-        end_dt = datetime.fromisoformat(end_date) if end_date else None
+        start_dt = None
+        end_dt = None
+        
+        if start_date:
+            try:
+                start_dt = datetime.fromisoformat(start_date)
+            except ValueError:
+                raise ValidationError("Invalid start_date format. Use YYYY-MM-DD format.")
+        
+        if end_date:
+            try:
+                end_dt = datetime.fromisoformat(end_date)
+            except ValueError:
+                raise ValidationError("Invalid end_date format. Use YYYY-MM-DD format.")
         
         logs = await self.notification_log_repo.get_notification_logs(
             user_id=user_id,

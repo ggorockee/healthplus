@@ -27,26 +27,7 @@ class MedicationService:
 
     async def create_medication(self, user_id: uuid.UUID, medication_data: MedicationCreate) -> MedicationResponse:
         """약물 등록 (API 명세서 기준)"""
-        medication = await self.med_repo.create_medication(
-            user_id=user_id,
-            name=medication_data.name,
-            dosage=medication_data.dosage,
-            notification_hour=medication_data.notification_time.hour,
-            notification_minute=medication_data.notification_time.minute,
-            repeat_days=medication_data.repeat_days,
-            is_active=True,
-            # 기존 필드들
-            image_path=medication_data.image_path,
-            daily_dosage_count=medication_data.daily_dosage_count,
-            dosage_times=medication_data.dosage_times,
-            form=medication_data.form,
-            single_dosage_amount=medication_data.single_dosage_amount,
-            dosage_unit=medication_data.dosage_unit,
-            has_meal_relation=medication_data.has_meal_relation,
-            meal_relation=medication_data.meal_relation,
-            is_continuous=medication_data.is_continuous,
-            memo=medication_data.memo
-        )
+        medication = await self.med_repo.create_medication(user_id, medication_data)
         return self._convert_to_response(medication)
 
     async def get_medications(self, user_id: uuid.UUID) -> MedicationListResponse:
@@ -119,10 +100,28 @@ class MedicationService:
         
         # 오늘 요일에 해당하는 약물들만 필터링
         today_weekday = today.weekday() + 1  # 월요일=1, 일요일=7
-        today_medications = [
-            med for med in medications 
-            if med.is_active and today_weekday in med.repeat_days
-        ]
+        today_medications = []
+        
+        for med in medications:
+            if not med.is_active:
+                continue
+                
+            # repeat_days를 안전하게 처리
+            try:
+                if isinstance(med.repeat_days, str):
+                    # JSON 문자열인 경우 파싱
+                    import json
+                    repeat_days = json.loads(med.repeat_days)
+                elif isinstance(med.repeat_days, list):
+                    repeat_days = med.repeat_days
+                else:
+                    continue
+                    
+                if today_weekday in repeat_days:
+                    today_medications.append(med)
+            except (json.JSONDecodeError, TypeError):
+                # JSON 파싱 실패 시 건너뛰기
+                continue
         
         medication_responses = [self._convert_to_response(med) for med in today_medications]
         return TodayMedicationResponse(
@@ -135,13 +134,15 @@ class MedicationService:
 
     async def create_medication_log(self, user_id: uuid.UUID, log_data: MedicationLogCreate) -> MedicationLogResponse:
         """복용 로그 기록 (API 명세서 기준)"""
-        log = await self.med_repo.create_medication_record(
-            user_id=user_id,
-            medication_id=uuid.UUID(log_data.medication_id),
-            taken_at=log_data.taken_at,
-            is_taken=log_data.is_taken,
-            note=log_data.note
+        # MedicationLogCreate를 MedicationRecordCreate로 변환
+        record_data = MedicationRecordCreate(
+            medication_id=log_data.medication_id,
+            date=log_data.taken_at,
+            time=log_data.taken_at.strftime('%H:%M:%S'),
+            status='taken' if log_data.is_taken else 'missed',
+            delay_reason=log_data.note
         )
+        log = await self.med_repo.create_medication_record(user_id, record_data)
         return self._convert_log_to_response(log)
 
     async def get_medication_logs(

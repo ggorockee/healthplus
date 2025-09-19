@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Optional, Dict, Any
 
 from jose import JWTError, jwt
@@ -31,10 +31,10 @@ class AuthService:
     def create_access_token(self, data: dict) -> str:
         """액세스 토큰 생성 (API 명세서 기준)"""
         to_encode = data.copy()
-        expire = datetime.utcnow() + timedelta(days=7)  # API 명세서: 7일
+        expire = datetime.now(timezone.utc) + timedelta(days=7)  # API 명세서: 7일
         to_encode.update({
             "exp": expire,
-            "iat": datetime.utcnow(),
+            "iat": datetime.now(timezone.utc),
             "iss": "onedaypillo-api",
             "type": "access"
         })
@@ -49,10 +49,10 @@ class AuthService:
     def create_refresh_token(self, data: dict) -> str:
         """리프레시 토큰 생성 (API 명세서 기준)"""
         to_encode = data.copy()
-        expire = datetime.utcnow() + timedelta(days=30)  # API 명세서: 30일
+        expire = datetime.now(timezone.utc) + timedelta(days=30)  # API 명세서: 30일
         to_encode.update({
             "exp": expire,
-            "iat": datetime.utcnow(),
+            "iat": datetime.now(timezone.utc),
             "iss": "onedaypillo-api",
             "type": "refresh"
         })
@@ -152,7 +152,15 @@ class AuthService:
         refresh_token = self.create_refresh_token(token_data)
         
         return AuthResponse(
-            user=UserResponse.model_validate(db_user),
+            user=UserResponse(
+                id=str(db_user.id),
+                email=db_user.email,
+                display_name=db_user.display_name,
+                photo_url=db_user.photo_url,
+                provider=db_user.provider,
+                is_email_verified=db_user.is_email_verified,
+                created_at=db_user.created_at
+            ),
             tokens=TokenResponse(
                 access_token=access_token,
                 refresh_token=refresh_token,
@@ -177,7 +185,15 @@ class AuthService:
         refresh_token = self.create_refresh_token(token_data)
 
         return AuthResponse(
-            user=UserResponse.model_validate(db_user),
+            user=UserResponse(
+                id=str(db_user.id),
+                email=db_user.email,
+                display_name=db_user.display_name,
+                photo_url=db_user.photo_url,
+                provider=db_user.provider,
+                is_email_verified=db_user.is_email_verified,
+                created_at=db_user.created_at
+            ),
             tokens=TokenResponse(
                 access_token=access_token,
                 refresh_token=refresh_token,

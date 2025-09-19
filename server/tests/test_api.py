@@ -8,7 +8,7 @@ from sqlalchemy.pool import StaticPool
 
 from main import app
 from app.infrastructure.database.session import get_db
-from app.infrastructure.database.models import Base
+from app.infrastructure.database.session import Base
 from app.infrastructure.database.models.user import User
 from app.infrastructure.database.models.medications import Medication, MedicationRecord
 from app.infrastructure.database.models.reminders import Reminder, NotificationLog

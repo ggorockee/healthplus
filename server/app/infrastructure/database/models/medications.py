@@ -2,16 +2,47 @@ import uuid
 from sqlalchemy import Column, String, Boolean, DateTime, func, ForeignKey, Integer, Numeric, Date, Time, JSON
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
+from sqlalchemy.types import TypeDecorator, CHAR
 
 from app.infrastructure.database.session import Base
+
+
+class GUID(TypeDecorator):
+    """SQLite 호환 UUID 타입"""
+    impl = CHAR
+    cache_ok = True
+
+    def load_dialect_impl(self, dialect):
+        if dialect.name == 'postgresql':
+            return dialect.type_descriptor(UUID())
+        else:
+            return dialect.type_descriptor(CHAR(36))
+
+    def process_bind_param(self, value, dialect):
+        if value is None:
+            return value
+        elif dialect.name == 'postgresql':
+            return str(value)
+        else:
+            if not isinstance(value, uuid.UUID):
+                return str(uuid.UUID(value))
+            return str(value)
+
+    def process_result_value(self, value, dialect):
+        if value is None:
+            return value
+        else:
+            if not isinstance(value, uuid.UUID):
+                return uuid.UUID(value)
+            return value
 
 
 class Medication(Base):
     """약물 정보를 저장하는 ORM 모델 (API 명세서 기준)"""
     __tablename__ = "medications"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False, index=True)
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+    user_id = Column(GUID(), ForeignKey("users.id"), nullable=False, index=True)
     
     # API 명세서 기준 필드들
     name = Column(String, nullable=False, comment="약물명")
@@ -54,9 +85,9 @@ class MedicationRecord(Base):
     """약물 복용 기록을 저장하는 ORM 모델 (API 명세서 기준)"""
     __tablename__ = "medication_records"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False, index=True)
-    medication_id = Column(UUID(as_uuid=True), ForeignKey("medications.id"), nullable=False, index=True)
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+    user_id = Column(GUID(), ForeignKey("users.id"), nullable=False, index=True)
+    medication_id = Column(GUID(), ForeignKey("medications.id"), nullable=False, index=True)
 
     # API 명세서 기준 필드들
     taken_at = Column(DateTime, nullable=False, comment="복용 시간")

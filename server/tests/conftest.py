@@ -5,8 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
-from app.infrastructure.database.session import get_db
-from app.infrastructure.database.models import Base
+from app.infrastructure.database.session import get_db, Base
 
 
 # 테스트용 데이터베이스 URL

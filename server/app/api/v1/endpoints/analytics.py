@@ -12,7 +12,7 @@ from app.core.exceptions import NotFoundError, ValidationError
 from app.core.error_codes import ErrorCode
 
 
-router = APIRouter(prefix="/analytics", tags=["통계 및 분석"])
+router = APIRouter(tags=["통계 및 분석"])
 
 
 @router.get("/medication-stats", response_model=MedicationStatsResponse)
@@ -26,11 +26,12 @@ async def get_medication_stats(
     try:
         # AnalyticsService 인스턴스 생성
         analytics_service = AnalyticsService(med_service.med_repo)
-        return await analytics_service.get_medication_stats(
+        stats = await analytics_service.get_medication_stats(
             user_id=user_id,
             start_date=start_date,
             end_date=end_date
         )
+        return stats
     except ValidationError as e:
         raise HTTPException(status_code=e.status_code, detail=e.detail)
 
@@ -46,11 +47,12 @@ async def get_compliance_rate(
     try:
         # AnalyticsService 인스턴스 생성
         analytics_service = AnalyticsService(med_service.med_repo)
-        return await analytics_service.get_compliance_rate(
+        compliance = await analytics_service.get_compliance_rate(
             user_id=user_id,
             medication_id=medication_id,
             period=period
         )
+        return compliance
     except (ValidationError, NotFoundError) as e:
         raise HTTPException(status_code=e.status_code, detail=e.detail)
 
@@ -66,11 +68,12 @@ async def get_medication_history(
     try:
         # AnalyticsService 인스턴스 생성
         analytics_service = AnalyticsService(med_service.med_repo)
-        return await analytics_service.get_medication_history(
+        history = await analytics_service.get_medication_history(
             user_id=user_id,
             medication_id=medication_id,
             period=period
         )
+        return history
     except (ValidationError, NotFoundError) as e:
         raise HTTPException(status_code=e.status_code, detail=e.detail)
 
@@ -84,6 +87,7 @@ async def get_analytics_summary(
     try:
         # AnalyticsService 인스턴스 생성
         analytics_service = AnalyticsService(med_service.med_repo)
-        return await analytics_service.get_analytics_summary(user_id=user_id)
+        summary = await analytics_service.get_analytics_summary(user_id=user_id)
+        return summary
     except ValidationError as e:
         raise HTTPException(status_code=e.status_code, detail=e.detail)

@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import List, Optional
 import uuid
-from datetime import date
+from datetime import date, datetime
 
 from app.infrastructure.database.models.medications import Medication, MedicationRecord
 from app.application.schemas.medication import MedicationCreate, MedicationUpdate, MedicationRecordCreate, MedicationRecordUpdate
@@ -58,4 +58,15 @@ class IMedicationRepository(ABC):
     @abstractmethod
     async def get_records_by_month(self, user_id: uuid.UUID, year: int, month: int) -> List[MedicationRecord]:
         """특정 월의 모든 복용 기록을 조회합니다."""
+        raise NotImplementedError
+
+    @abstractmethod
+    async def get_records_by_date_range(
+        self, 
+        user_id: uuid.UUID, 
+        start_date: datetime, 
+        end_date: datetime,
+        medication_id: Optional[uuid.UUID] = None
+    ) -> List[MedicationRecord]:
+        """날짜 범위로 복용 기록을 조회합니다."""
         raise NotImplementedError
