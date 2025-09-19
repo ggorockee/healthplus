@@ -4,7 +4,6 @@ import '../config/theme.dart';
 import '../widgets/app_button.dart';
 import '../widgets/app_input.dart';
 import '../widgets/social_login_button.dart';
-import '../providers/auth_provider.dart';
 import '../providers/api_auth_provider.dart';
 import '../models/user.dart';
 import 'signup_screen.dart';
@@ -34,20 +33,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final authState = ref.watch(authProvider);
-
-    // 인증 성공 시 메인 화면으로 이동
-    ref.listen(authProvider, (previous, next) {
-      if (next.isAuthenticated) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => const MainNavigationScreen()),
-        );
-      } else if (next.hasError) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(next.errorMessage ?? '로그인에 실패했습니다.')),
-        );
-      }
-    });
+    final apiAuthState = ref.watch(apiAuthProvider);
 
     // API 인증 성공 시 메인 화면으로 이동
     ref.listen(apiAuthProvider, (previous, next) {
@@ -138,9 +124,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   // LOG IN 버튼
                   AppButton(
                     label: 'LOG IN',
-                    onPressed: authState.isLoading ? null : _signInWithEmail,
+                    onPressed: apiAuthState.status == AuthStatus.loading ? null : _signInWithEmail,
                     filled: true,
-                    isLoading: authState.isLoading,
+                    isLoading: apiAuthState.status == AuthStatus.loading,
                   ),
                   
                   const SizedBox(height: 20),
@@ -167,7 +153,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   
                   const SizedBox(height: 40),
                   
-                  // OR LOG IN WITH EMAIL 텍스트
+                  // 소셜 로그인 섹션 (목업)
                   Text(
                     'OR LOG IN WITH SOCIAL',
                     style: AppTypography.textTheme.labelMedium?.copyWith(
@@ -177,32 +163,32 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ),
                     textAlign: TextAlign.center,
                   ),
-                  
+
                   const SizedBox(height: 24),
-                  
-                  // Google 로그인 버튼
+
+                  // Google 로그인 버튼 (목업)
                   SocialLoginButton(
                     type: SocialLoginType.google,
-                    onPressed: _signInWithGoogle,
-                    isLoading: authState.isLoading,
+                    onPressed: _showSocialLoginComingSoon,
+                    isLoading: false,
                   ),
-                  
+
                   const SizedBox(height: 16),
-                  
-                  // Facebook 로그인 버튼
+
+                  // Facebook 로그인 버튼 (목업)
                   SocialLoginButton(
                     type: SocialLoginType.facebook,
-                    onPressed: _signInWithFacebook,
-                    isLoading: authState.isLoading,
+                    onPressed: _showSocialLoginComingSoon,
+                    isLoading: false,
                   ),
-                  
+
                   const SizedBox(height: 16),
-                  
-                  // Kakao 로그인 버튼
+
+                  // Kakao 로그인 버튼 (목업)
                   SocialLoginButton(
                     type: SocialLoginType.kakao,
-                    onPressed: _signInWithKakao,
-                    isLoading: authState.isLoading,
+                    onPressed: _showSocialLoginComingSoon,
+                    isLoading: false,
                   ),
                   
                   const SizedBox(height: 40),
@@ -269,39 +255,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     }
   }
 
-  /// Google 로그인
-  Future<void> _signInWithGoogle() async {
-    if (isIncubatorMode) {
-      // Incubator 모드에서는 바로 홈 화면으로 이동
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => const MainNavigationScreen()),
-      );
-      return;
-    }
-    await ref.read(authProvider.notifier).signInWithGoogle();
-  }
-
-  /// Facebook 로그인 (실제로는 Kakao로 대체)
-  Future<void> _signInWithFacebook() async {
-    if (isIncubatorMode) {
-      // Incubator 모드에서는 바로 홈 화면으로 이동
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => const MainNavigationScreen()),
-      );
-      return;
-    }
-    await ref.read(authProvider.notifier).signInWithKakao();
-  }
-
-  /// Kakao 로그인
-  Future<void> _signInWithKakao() async {
-    if (isIncubatorMode) {
-      // Incubator 모드에서는 바로 홈 화면으로 이동
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => const MainNavigationScreen()),
-      );
-      return;
-    }
-    await ref.read(authProvider.notifier).signInWithKakao();
+  /// 소셜 로그인 준비 중 메시지 표시 (목업)
+  void _showSocialLoginComingSoon() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('소셜 로그인 기능은 곧 제공될 예정입니다.'),
+        duration: Duration(seconds: 2),
+      ),
+    );
   }
 }

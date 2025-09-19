@@ -4,7 +4,6 @@ import '../config/theme.dart';
 import '../widgets/app_button.dart';
 import '../widgets/app_input.dart';
 import '../widgets/social_login_button.dart';
-import '../providers/auth_provider.dart';
 import '../providers/api_auth_provider.dart';
 import '../models/user.dart';
 import 'login_screen.dart';
@@ -36,20 +35,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final authState = ref.watch(authProvider);
-
-    // 인증 성공 시 메인 화면으로 이동
-    ref.listen(authProvider, (previous, next) {
-      if (next.isAuthenticated) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => const MainNavigationScreen()),
-        );
-      } else if (next.hasError) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(next.errorMessage ?? '회원가입에 실패했습니다.')),
-        );
-      }
-    });
+    final apiAuthState = ref.watch(apiAuthProvider);
 
     // API 인증 성공 시 메인 화면으로 이동
     ref.listen(apiAuthProvider, (previous, next) {
@@ -169,9 +155,9 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                   // CREATE ACCOUNT 버튼
                   AppButton(
                     label: 'CREATE ACCOUNT',
-                    onPressed: authState.isLoading ? null : _signUpWithEmail,
+                    onPressed: apiAuthState.status == AuthStatus.loading ? null : _signUpWithEmail,
                     filled: true,
-                    isLoading: authState.isLoading,
+                    isLoading: apiAuthState.status == AuthStatus.loading,
                   ),
                   
                   const SizedBox(height: 40),
@@ -192,8 +178,8 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                   // Google 회원가입 버튼
                   SocialLoginButton(
                     type: SocialLoginType.google,
-                    onPressed: _signUpWithGoogle,
-                    isLoading: authState.isLoading,
+                    onPressed: _showSocialLoginComingSoon,
+                    isLoading: false,
                   ),
                   
                   const SizedBox(height: 16),
@@ -201,8 +187,8 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                   // Facebook 회원가입 버튼
                   SocialLoginButton(
                     type: SocialLoginType.facebook,
-                    onPressed: _signUpWithFacebook,
-                    isLoading: authState.isLoading,
+                    onPressed: _showSocialLoginComingSoon,
+                    isLoading: false,
                   ),
                   
                   const SizedBox(height: 16),
@@ -210,8 +196,8 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                   // Kakao 회원가입 버튼
                   SocialLoginButton(
                     type: SocialLoginType.kakao,
-                    onPressed: _signUpWithKakao,
-                    isLoading: authState.isLoading,
+                    onPressed: _showSocialLoginComingSoon,
+                    isLoading: false,
                   ),
                   
                   const SizedBox(height: 40),
@@ -279,39 +265,13 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
     }
   }
 
-  /// Google 회원가입
-  Future<void> _signUpWithGoogle() async {
-    if (isIncubatorMode) {
-      // Incubator 모드에서는 바로 홈 화면으로 이동
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => const MainNavigationScreen()),
-      );
-      return;
-    }
-    await ref.read(authProvider.notifier).signInWithGoogle();
-  }
-
-  /// Facebook 회원가입 (실제로는 Kakao로 대체)
-  Future<void> _signUpWithFacebook() async {
-    if (isIncubatorMode) {
-      // Incubator 모드에서는 바로 홈 화면으로 이동
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => const MainNavigationScreen()),
-      );
-      return;
-    }
-    await ref.read(authProvider.notifier).signInWithKakao();
-  }
-
-  /// Kakao 회원가입
-  Future<void> _signUpWithKakao() async {
-    if (isIncubatorMode) {
-      // Incubator 모드에서는 바로 홈 화면으로 이동
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => const MainNavigationScreen()),
-      );
-      return;
-    }
-    await ref.read(authProvider.notifier).signInWithKakao();
+  /// 소셜 로그인 준비 중 메시지 표시 (목업)
+  void _showSocialLoginComingSoon() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('소셜 로그인 기능은 곧 제공될 예정입니다.'),
+        duration: Duration(seconds: 2),
+      ),
+    );
   }
 }

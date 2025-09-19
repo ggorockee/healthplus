@@ -8,9 +8,7 @@ import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_performance/firebase_performance.dart';
 import 'config/theme.dart';
-import 'config/supabase_config.dart';
 import 'config/firebase_config.dart';
-import 'providers/auth_provider.dart';
 import 'providers/api_auth_provider.dart';
 import 'services/api_client.dart';
 import 'models/user.dart';
@@ -54,8 +52,6 @@ void main() async {
     await MobileAds.instance.initialize();
   }
   
-  // Supabase 초기화 (개발 단계에서도 필요)
-  await SupabaseConfig.initialize();
   
   // API 클라이언트 초기화
   ApiClient().initialize();
@@ -88,11 +84,10 @@ class AuthWrapper extends ConsumerWidget {
       return const MainNavigationScreen();
     }
 
-    final authState = ref.watch(authProvider);
     final apiAuthState = ref.watch(apiAuthProvider);
 
     // 로딩 중
-    if (authState.status == AuthStatus.loading || apiAuthState.status == AuthStatus.loading) {
+    if (apiAuthState.status == AuthStatus.loading) {
       return const Scaffold(
         body: Center(
           child: CircularProgressIndicator(),
@@ -100,8 +95,8 @@ class AuthWrapper extends ConsumerWidget {
       );
     }
 
-    // 인증된 사용자 (API 또는 Supabase)
-    if (authState.isAuthenticated || apiAuthState.status == AuthStatus.authenticated) {
+    // 인증된 사용자 (API 기반만)
+    if (apiAuthState.status == AuthStatus.authenticated) {
       return const MainNavigationScreen();
     }
 
