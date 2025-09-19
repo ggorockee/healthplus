@@ -53,11 +53,6 @@ dependencies:
   
   # 인증 관련
   firebase_core: ^3.6.0
-  firebase_auth: ^5.3.1
-  google_sign_in: ^6.2.1
-  kakao_flutter_sdk: ^1.9.4
-  sign_in_with_apple: ^6.1.2
-  supabase_flutter: ^2.10.1
   
   # Firebase 성능 및 분석
   firebase_analytics: ^11.3.3
